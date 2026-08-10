@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paw Sweet Paw Jamboree — Dashboard</title>
+<meta name="robots" content="noindex, follow">
+<style>
+  :root {
+    color-scheme: light dark;
+    --ink: #1c1c1e; --bg: #f6f7f9; --panel: #ffffff; --border: #e6e8ee;
+    --muted: #767a85; --accent: #0a6cff; --accent-soft: #e8eefc; --accent-ink: #24478f;
+    --radius: 14px; --radius-sm: 8px;
+    --shadow: 0 1px 2px rgba(16,24,40,.04), 0 4px 14px rgba(16,24,40,.05);
+    --tile-h: 236px; --cols: 3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #e8e8ea; --bg: #121317; --panel: #1b1c22; --border: #2c2d36; --muted: #9498a3; --accent-soft: #16213f; --accent-ink: #8fb0f7; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25); }
+  }
+  /* Reduced desktop window (e.g. a laptop split-screened, not maximized): drop to 2 columns, keep everything else identical. */
+  @media (max-width: 1180px) { :root { --cols: 2; --tile-h: 220px; } }
+  /* Phone/narrow tablet: stack to 1 column. Desktop stays the reference layout; this tier only needs to stay usable. */
+  @media (max-width: 720px) { :root { --cols: 1; --tile-h: 210px; } }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--bg); overflow: hidden; }
+  @media (max-width: 720px) { body { overflow-y: auto; } }
+
+  .dash-header { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 28px; background: #1c2b4a; color: #fff; flex-wrap: wrap; }
+  .dash-header h1 { font-size: 1.15rem; margin: 0; letter-spacing: -0.01em; }
+  .dash-header .sub { font-size: 0.8rem; color: #aebbdc; margin-top: 2px; }
+  .dash-header a { color: #cfe0ff; font-size: 0.82rem; text-decoration: none; white-space: nowrap; }
+  .dash-header a:hover { text-decoration: underline; }
+  .header-links { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .pos-booking-btn { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #1c2b4a !important; padding: 6px 14px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; text-decoration: none !important; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .pos-booking-btn:hover { background: #eef1f8; }
+  .pos-booking-btn img { height: 24px; width: auto; display: block; }
+
+  .tabs { flex: 0 0 auto; display: flex; gap: 4px; padding: 0 28px; background: var(--panel); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .tab-btn { appearance: none; border: none; background: transparent; color: var(--muted); font-size: 0.86rem; font-weight: 600; padding: 14px 6px; margin: 0 12px; cursor: pointer; border-bottom: 2.5px solid transparent; transition: color .15s, border-color .15s; white-space: nowrap; }
+  .tab-btn:first-child { margin-left: 0; }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn .flag { display: inline-block; margin-left: 6px; width: 7px; height: 7px; border-radius: 50%; background: #d9534f; vertical-align: middle; }
+
+  .content { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 24px 28px 48px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Fixed-size tile grid: --cols columns, --tile-h row height. A tile's
+     (cols,rows) span is set inline per-component and stays constant across
+     every location's dashboard — only the number of grid columns adapts
+     by breakpoint. Content that doesn't fill a tile just leaves it empty;
+     content that overflows scrolls inside the tile, never resizes it. */
+  .dash-grid { display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-auto-rows: var(--tile-h); gap: 16px; }
+  .tile {
+    grid-column: span min(var(--tcols, 1), var(--cols));
+    grid-row: span var(--trows, 1);
+    background: var(--panel); border: 1px solid var(--border); box-shadow: var(--shadow);
+    border-radius: var(--radius); padding: 16px 18px; overflow-y: auto;
+  }
+  .tile h2 { font-size: 0.98rem; margin: 2px 0 8px; }
+  .tile h3 { font-size: 0.86rem; margin: 1em 0 4px; }
+  .tile h3:first-of-type { margin-top: 0.2em; }
+  .tile table { border-collapse: collapse; width: 100%; font-size: 0.83rem; margin: 0.5em 0; }
+  .tile th, .tile td { border: 1px solid var(--border); padding: 5px 9px; text-align: left; }
+  .tile th { background: var(--bg); position: sticky; top: 0; }
+  .tile ul { margin: 0.35em 0; padding-left: 1.2em; line-height: 1.5; }
+  .tile li { margin-bottom: 2px; }
+  .tile p { margin: 0.45em 0; line-height: 1.5; }
+  .source-banner { display: inline-block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; margin: 0 0 8px; }
+  .source-location { background: #e6f4ea; color: #1a7431; }
+  .source-brand { background: var(--accent-soft); color: var(--accent-ink); }
+  .source-default { background: #f4eee3; color: #7a5b1e; }
+  .source-gap { background: #fbe7e7; color: #9c2b2b; }
+  .source-system { background: #ece9f7; color: #4d3d99; }
+  @media (prefers-color-scheme: dark) {
+    .source-location { background: #10331b; color: #6fd98c; }
+    .source-default { background: #332a15; color: #e0bb6a; }
+    .source-gap { background: #3a1717; color: #f0a3a3; }
+    .source-system { background: #2a2440; color: #b8a8f0; }
+  }
+  .gap-note { font-style: italic; color: #9c2b2b; margin: 0; }
+  @media (prefers-color-scheme: dark) { .gap-note { color: #f0a3a3; } }
+  .reference-note { color: var(--muted); font-size: 0.85rem; }
+  .conflict-note { background: #fff4e5; border: 1px solid #f0d9a8; border-radius: 8px; padding: 8px 12px; font-size: 0.8rem; margin: 8px 0; color: #7a5b1e; }
+  @media (prefers-color-scheme: dark) { .conflict-note { background: #332a15; border-color: #4a3d20; color: #e0bb6a; } }
+  .kv { margin: 0.3em 0; font-size: 0.85rem; line-height: 1.5; }
+  .kv b { font-weight: 600; }
+  .toc-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .toc-links a { display: inline-block; color: var(--accent-ink); background: var(--accent-soft); text-decoration: none; padding: 5px 12px; border-radius: 999px; font-size: 0.8rem; }
+  .toc-links a.gap-link { color: #9c2b2b; background: #fbe7e7; }
+  @media (prefers-color-scheme: dark) { .toc-links a.gap-link { color: #f0a3a3; background: #3a1717; } }
+</style>
+</head>
+<body>
+  <div class="dash-header">
+    <div>
+      <h1>Paw Sweet Paw Jamboree</h1>
+      <div class="sub">Paw Sweet Paw · Center 246 · Dashboard view</div>
+    </div>
+    <div class="header-links">
+      <a class="pos-booking-btn" href="https://go.moego.pet/home/overview?%7Ec=126757&%7Eb=127473" target="_blank" rel="noopener"><img src="../assets/moego-logo.jpg" alt="MoeGo logo">Visit this center's booking site</a>
+      <a href="jamboree.html">View Full Knowledgebase Page →</a>
+    </div>
+  </div>
+
+  <div class="tabs"><button class="tab-btn" data-tab="center-info">Center Information<span class="flag" title="Contains a conflict"></span></button><button class="tab-btn" data-tab="booking-readiness">Booking Readiness<span class="flag" title="Contains a gap"></span></button><button class="tab-btn" data-tab="boarding">Boarding</button><button class="tab-btn" data-tab="daycare">Daycare</button><button class="tab-btn" data-tab="training">Training</button><button class="tab-btn" data-tab="grooming">Grooming</button><button class="tab-btn" data-tab="addons-discounts">Add-Ons & Discounts</button><button class="tab-btn" data-tab="company-policies">Best Friends Pet Care Policies</button></div>
+
+  <div class="content"><div class="panel" data-tab="center-info"><div class="dash-grid"><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-system">Center info system (CSV)</div><h2>Contact Info</h2><p class="kv"><b>Address:</b> 16811 Noyes Ave., Irvine, CA 92606</p><p class="kv"><b>Phone — for calling:</b> (949) 333-1465</p><p class="kv"><b>Phone — for texting (MoeGo SMS):</b> (845) 704-4881</p></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-system">Center info system (CSV)</div><h2>Identifiers & Systems</h2><p class="kv"><b>Center ID / Code:</b> 246 / PSP246</p><p class="kv"><b>POS System:</b> MoeGo</p><p class="kv"><b>Marketing Tier:</b> Not Yet Determined</p><p class="kv"><b>Timezone:</b> America/Los_Angeles</p><p class="kv"><b>MoeGo Business ID:</b> biz2cSr</p><p class="kv"><b>MoeGo Company ID:</b> cop0gc9</p><p class="kv"><b>MoeGo Name on Record:</b> Paw Sweet Paw Jamboree</p><p class="kv"><b>PawConnect Reporting:</b> TRUE</p></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-system">Center info system (CSV)</div><h2>Center Links</h2><p class="kv"><b>Home Page:</b> <a href="https://www.pawsweetpaw.com/" target="_blank" rel="noopener">https://www.pawsweetpaw.com/</a></p><p class="kv"><b>Book Now (customers):</b> <a href="https://booking.moego.pet/ol/landing?name=246247PawSweetPaw" target="_blank" rel="noopener">Book Now</a></p><p class="kv"><b>POS Direct Login (internal):</b> <a href="https://go.moego.pet/home/overview?%7Ec=126757&%7Eb=127473" target="_blank" rel="noopener">MoeGo Link</a></p><p class="kv"><b>Google Business Profile:</b> <a href="https://share.google/vqiwpnyIbNSiZ2yWj" target="_blank" rel="noopener">View listing</a></p><p class="kv"><b>Leave a Review:</b> <a href="https://g.page/r/CRPKmYefs77hEBM/review" target="_blank" rel="noopener">Review link</a></p><p class="kv"><b>Facebook:</b> <a href="https://www.facebook.com/pawsweetpaw" target="_blank" rel="noopener">Open</a></p><p class="kv"><b>Instagram:</b> <a href="https://www.instagram.com/pawsweetpaw/" target="_blank" rel="noopener">Open</a></p><p class="kv"><b>TikTok:</b> <a href="https://www.tiktok.com/@pawsweetpaw" target="_blank" rel="noopener">Open</a></p></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-system">Center info system (CSV)</div><h2>Services</h2><table><thead><tr><th>Services</th></tr></thead><tbody><tr><td>Dog Boarding</td></tr><tr><td>Day Boarding</td></tr><tr><td>Daycare</td></tr><tr><td>Grooming</td></tr><tr><td>Enrichment</td></tr></tbody></table><p class="kv"><b>Notes:</b> All group play is 1 person per 15 dogs</p></div><div class="tile" style="--tcols:2;--trows:1"><div class="source-banner source-system">Center info system (CSV)</div><h2>Hours</h2><table><thead><tr><th>Day</th><th>Hours</th></tr></thead><tbody><tr><td>Sunday</td><td>8:00 AM - 6:00 PM</td></tr><tr><td>Monday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Tuesday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Wednesday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Thursday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Friday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Saturday</td><td>8:00 AM - 6:00 PM</td></tr></tbody></table><p class="kv"><b>Special Hours:</b> Front desk is closed on all major holidays.</p></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-system">Center info system (CSV)</div><h2>Org Chart</h2><div class="conflict-note">⚠ Conflict: CSV says <b>Jamie Rotts</b>, the knowledge base file says <b>Jamie Rahtz — jrahtz@bestfriends.net</b>. Needs reconciling before an agent relies on either.</div><p class="kv"><b>Region:</b> West</p><p class="kv"><b>Regional Director:</b> Brad Swanson — bswanson@bestfriends.net</p><p class="kv"><b>District Manager:</b> Emilie Galceran — egalceran@bestfriends.net</p><p class="kv"><b>Center Manager (CSV):</b> Jamie Rotts — jrotts@bestfriends.net</p><p class="kv"><b>Center Manager Generic Email:</b> JAM_MGR@bestfriends.net</p><p class="kv"><b>Center Generic Email:</b> JAM@bestfriends.net</p></div></div></div><div class="panel" data-tab="booking-readiness"><div class="dash-grid"><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Vaccine Requirements</h2><ul>
+<li><strong>Dogs:</strong> Rabies, Distemper, Bordetella</li>
+<li><strong>NO HANDWRITTEN VACCINE PAPERWORK</strong></li>
+<li>Youngest age to board: 2 months — must have at least two rounds of DHPP and Bordetella. Rabies is not required if the pet is under 4 months and of appropriate age.</li>
+</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Boarding Together Rules</h2><ul>
+<li>Must be neutered by 18 months to participate in group play</li>
+<li>Dogs can only share overnight suites if they are <strong>siblings</strong></li>
+<li>An unspayed female and unneutered male may <strong>not</strong> be in the same group</li>
+</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Evaluations</h2><ul>
+<li>Bring pet in for a <strong>free day</strong> — recommend minimum 4 hours</li>
+</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Tours</h2><p class="gap-note">Not documented for Paw Sweet Paw Jamboree at any level. Flag before an agent answers this for a customer.</p></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Camera Access</h2><ul>
+<li>Go to pawsweetpaw.com → pull up location → click <strong>Book Now</strong> → enter phone number to find existing account → green light in top right corner shows camera feed</li>
+</ul></div></div></div><div class="panel" data-tab="boarding"><div class="dash-grid"><div class="tile" style="--tcols:2;--trows:2"><div class="source-banner source-location">Location-specific</div><h2>Boarding</h2><h3>Dogs — Boarding</h3><ul>
+<li><strong>All-inclusive boarding:</strong> $89.50/night (grouped by size and temperament, rotated regularly throughout the day)</li>
+<li>Deluxe Suites: 5'–8' wide x 7'–8' tall</li>
+<li>Family Suites: 7'–9' wide x 7'–8' tall</li>
+</ul></div></div></div><div class="panel" data-tab="daycare"><div class="dash-grid"><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Daycare Rates</h2><h3>Dogs — Daycare</h3><ul>
+<li>Short Day (5 hours): $36</li>
+<li>Full Day (12 hours): $57</li>
+</ul></div><div class="tile" style="--tcols:2;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Daycare Packages</h2><table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Short Day — 10 days</td>
+<td>$324</td>
+</tr>
+<tr>
+<td>Short Day — 20 days</td>
+<td>$612</td>
+</tr>
+<tr>
+<td>Short Day — 30 days</td>
+<td>$864</td>
+</tr>
+<tr>
+<td>Full Day — 10 days</td>
+<td>$513</td>
+</tr>
+<tr>
+<td>Full Day — 20 days</td>
+<td>$912</td>
+</tr>
+<tr>
+<td>Full Day — 30 days</td>
+<td>$1,283</td>
+</tr>
+</tbody>
+</table></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Play Group Policy</h2><ul>
+<li>Must be neutered by 18 months to participate in group play</li>
+<li>Dogs can only share overnight suites if they are <strong>siblings</strong></li>
+<li>An unspayed female and unneutered male may <strong>not</strong> be in the same group</li>
+</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Evaluation</h2><ul>
+<li>Bring pet in for a <strong>free day</strong> — recommend minimum 4 hours</li>
+</ul></div></div></div><div class="panel" data-tab="training"><div class="dash-grid"><div class="tile" style="--tcols:2;--trows:2"><div class="source-banner source-location">Location-specific</div><h2>Training</h2><h3>Training</h3><ul>
+<li>Puppy class: $63.60</li>
+<li>Beginner class: $63.60</li>
+<li>Board and train (30 min): $55</li>
+<li>Board and train (60 min): $75</li>
+<li>Private Session: $75</li>
+<li>Stay Smart: $30</li>
+<li>Start Smart: $45</li>
+</ul></div></div></div><div class="panel" data-tab="grooming"><div class="dash-grid"><div class="tile" style="--tcols:2;--trows:2"><div class="source-banner source-location">Location-specific</div><h2>Grooming</h2><h3>Groomers &amp; Availability</h3>
+<ul>
+<li>Christian Diaz, Karla Diaz, Melissa Sanchez, Jonathan Powers, Michelle Chavez, Cathy Sanchez, Michelle Chin</li>
+<li>Check MoeGo for current schedule — schedule is accurate for all</li>
+<li><strong>Sweet Tidy Ups &amp; Sweet Grooms:</strong> 7:30 AM – 4:00 PM every day (possible appointments)</li>
+</ul>
+<h3>Grooming Pricing</h3>
+<p><strong>Sweet Baths</strong> (includes Nail Trim, Teeth Brush, Anal Glands):</p>
+<table>
+<thead>
+<tr>
+<th>Size</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small (up to 25 lbs)</td>
+<td>$57</td>
+</tr>
+<tr>
+<td>Medium (25–50 lbs)</td>
+<td>$59.50</td>
+</tr>
+<tr>
+<td>Large (50–75 lbs)</td>
+<td>$68</td>
+</tr>
+<tr>
+<td>XL (75 lbs+)</td>
+<td>$69.50</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Bath</strong> (includes ear cleaning only):</p>
+<table>
+<thead>
+<tr>
+<th>Size</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small (up to 25 lbs)</td>
+<td>$39.50</td>
+</tr>
+<tr>
+<td>Medium (25–50 lbs)</td>
+<td>$46.50</td>
+</tr>
+<tr>
+<td>Large (50–75 lbs)</td>
+<td>$49.50</td>
+</tr>
+<tr>
+<td>XL (75 lbs+)</td>
+<td>$57</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sweet Tidy Ups</strong> (Sweet Bath + tidy around eyes, ears, sanitary area, paws — <strong>no legs or body</strong>):</p>
+<table>
+<thead>
+<tr>
+<th>Size</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small (up to 25 lbs)</td>
+<td>$69.50</td>
+</tr>
+<tr>
+<td>Medium (25–50 lbs)</td>
+<td>$79.50</td>
+</tr>
+<tr>
+<td>Large (50–75 lbs)</td>
+<td>$89.50</td>
+</tr>
+<tr>
+<td>XL (75 lbs+)</td>
+<td>$99.50</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sweet Grooms</strong> (Sweet Bath + Sweet Trim + full face, body groom, hand scissoring, breed-specific cuts):</p>
+<table>
+<thead>
+<tr>
+<th>Size</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small (up to 25 lbs)</td>
+<td>$99.50</td>
+</tr>
+<tr>
+<td>Medium (25–50 lbs)</td>
+<td>$110</td>
+</tr>
+<tr>
+<td>Large (50–75 lbs)</td>
+<td>$121</td>
+</tr>
+<tr>
+<td>XL (75 lbs+)</td>
+<td>$131.50</td>
+</tr>
+</tbody>
+</table></div></div></div><div class="panel" data-tab="addons-discounts"><div class="dash-grid"><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Add-On Services</h2><ul>
+<li>Fetch &amp; Tug (15 min): $16</li>
+<li>Puzzle Time (15 min): $16</li>
+<li>Outdoor Stroll (10 min): $16</li>
+<li>Sniff &amp; Find (15 min): $16</li>
+<li>Cuddle Time &amp; Brush Out (15 min): $16</li>
+<li>Add-on meal: $5</li>
+<li>Individual Care: $10.50</li>
+</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Discounts</h2><ul>
+<li>10% off second pet; 20% off each additional pet after that</li>
+<li>10% off 7+ nights; 15% off 14+ nights; 20% off 21+ nights</li>
+<li>New clients: 25% off first board</li>
+<li>20% off first groom + first week of daycare free — must be used within 7 days (do not need to use all 7)</li>
+</ul></div></div></div><div class="panel" data-tab="company-policies"><div class="dash-grid"><div class="tile" style="--tcols:2;--trows:1"><div class="source-banner source-default">Best Friends standard</div><h2>Best Friends Pet Care Policies</h2><p class="reference-note">Reference material, not usually needed mid-call. Full text lives on the <a href="../best-friends-standard.html">Best Friends Standard</a> page.</p><div class="toc-links"><a href="../best-friends-standard.html#what-owners-can-bring">What Owners Can Bring</a><a href="../best-friends-standard.html#food">Food</a><a href="../best-friends-standard.html#drop-off">Drop-Off</a><a href="../best-friends-standard.html#medication-policy">Medication Policy</a><a href="../best-friends-standard.html#shared-accommodations">Shared Accommodations</a><a href="../best-friends-standard.html#animals-we-cannot-accept">Animals We Cannot Accept</a><a href="../best-friends-standard.html#parasites">Parasites</a><a href="../best-friends-standard.html#complaints-concerns">Complaints & Concerns</a></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-default">Best Friends standard</div><h2>Explicit Exceptions</h2><p class="reference-note">Paw Sweet Paw Jamboree has no exceptions on file — every topic above follows the standard as-is.</p></div></div></div></div>
+
+<script>
+(function() {
+  var buttons = document.querySelectorAll('.tab-btn');
+  var panels = document.querySelectorAll('.panel');
+  function activate(key) {
+    buttons.forEach(function(b) { b.classList.toggle('active', b.dataset.tab === key); });
+    panels.forEach(function(p) { p.classList.toggle('active', p.dataset.tab === key); });
+  }
+  buttons.forEach(function(b) {
+    b.addEventListener('click', function() {
+      activate(b.dataset.tab);
+      history.replaceState(null, '', '#' + b.dataset.tab);
+    });
+  });
+  var initial = (location.hash || '').replace('#', '') || buttons[0].dataset.tab;
+  if (![].some.call(buttons, function(b) { return b.dataset.tab === initial; })) { initial = buttons[0].dataset.tab; }
+  activate(initial);
+})();
+</script>
+</body>
+</html>

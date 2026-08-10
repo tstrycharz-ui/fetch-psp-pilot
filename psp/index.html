@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overview — Paw Sweet Paw Knowledgebase</title>
+<meta name="description" content="Brand-wide rates, hours, and policies shared by both Paw Sweet Paw locations, plus a full map of the knowledgebase.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://fetch-paw-sweet-paw.netlify.app/psp/index.html">
+
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; max-width: 820px; margin: 0 auto; padding: 32px 20px 80px; line-height: 1.55; color: #1c1c1e; background: #fff; }
+  @media (prefers-color-scheme: dark) { body { color: #e8e8ea; background: #16161a; } }
+  h1 { font-size: 1.6rem; margin-bottom: 4px; }
+  h2 { font-size: 1.2rem; margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 4px; scroll-margin-top: 12px; }
+  @media (prefers-color-scheme: dark) { h2 { border-color: #333; } }
+  h3 { font-size: 1.02rem; margin-top: 1.4em; }
+  table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 0.95rem; }
+  th, td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
+  @media (prefers-color-scheme: dark) { th, td { border-color: #333; } }
+  th { background: #f5f5f7; }
+  @media (prefers-color-scheme: dark) { th { background: #222226; } }
+  .nav { font-size: 0.9rem; margin-bottom: 18px; }
+  .nav a { color: #0a6cff; text-decoration: none; margin-right: 14px; }
+  .toc { font-size: 0.88rem; background: #f7f7f9; border: 1px solid #e4e4e8; border-radius: 8px; padding: 14px 16px; margin: 18px 0 28px; }
+  @media (prefers-color-scheme: dark) { .toc { background: #1e1e22; border-color: #2c2c31; } }
+  .toc strong { display: block; margin-bottom: 10px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: #888; }
+  .toc-links { display: flex; flex-wrap: wrap; gap: 8px 8px; }
+  .toc a, .toc-links a { display: inline-block; color: #24478f; background: #e8eefc; text-decoration: none; white-space: nowrap; padding: 5px 12px; border-radius: 999px; font-size: 0.82rem; border: 1px solid transparent; transition: background 0.15s; }
+  .toc a:hover, .toc-links a:hover { background: #d6e0fa; }
+  @media (prefers-color-scheme: dark) {
+    .toc a, .toc-links a { color: #8fb0f7; background: #16213f; }
+    .toc a:hover, .toc-links a:hover { background: #1e2d54; }
+  }
+  .toc-links a.gap-link { color: #9c2b2b; background: #fbe7e7; }
+  @media (prefers-color-scheme: dark) { .toc-links a.gap-link { color: #f0a3a3; background: #3a1717; } }
+  .source-banner { display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin: 0 0 6px; }
+  .source-location { background: #e6f4ea; color: #1a7431; }
+  .source-brand { background: #e8eefc; color: #24478f; }
+  .source-default { background: #f4eee3; color: #7a5b1e; }
+  .source-gap { background: #fbe7e7; color: #9c2b2b; }
+  @media (prefers-color-scheme: dark) {
+    .source-location { background: #10331b; color: #6fd98c; }
+    .source-brand { background: #16213f; color: #8fb0f7; }
+    .source-default { background: #332a15; color: #e0bb6a; }
+    .source-gap { background: #3a1717; color: #f0a3a3; }
+  }
+  section { margin-top: 2.4em; padding-top: 1.3em; border-top: 1px solid #e4e4e8; scroll-margin-top: 12px; }
+  @media (prefers-color-scheme: dark) { section { border-color: #2c2c31; } }
+  section:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+  .gap-note { font-style: italic; color: #9c2b2b; }
+  @media (prefers-color-scheme: dark) { .gap-note { color: #f0a3a3; } }
+  .reference-note { color: #555; }
+  @media (prefers-color-scheme: dark) { .reference-note { color: #aaa; } }
+  blockquote { border-left: 3px solid #0a6cff; margin: 0.8em 0; padding: 2px 14px; color: #444; }
+  @media (prefers-color-scheme: dark) { blockquote { color: #bbb; } }
+  footer { margin-top: 3em; font-size: 0.8rem; color: #888; border-top: 1px solid #ddd; padding-top: 12px; }
+  @media (prefers-color-scheme: dark) { footer { border-color: #333; } }
+</style>
+</head>
+<body>
+<div class="nav"><a href="index.html">Paw Sweet Paw — Overview</a><a href="jamboree.html">Jamboree</a><a href="spectrum.html">Spectrum</a><a href="../best-friends-standard.html">Best Friends Standard</a></div>
+<h1>Paw Sweet Paw</h1><p>Two locations in Irvine, CA.</p>
+<nav class="toc"><strong>On this page</strong><div class="toc-links"><a href="#locations">Locations</a><a href="#booking">Website & Booking</a><a href="#rates">Shared Rates</a><a href="#daycare-packages">Shared Daycare Packages</a><a href="#training">Shared Training Pricing</a><a href="#hours">Shared Hours</a><a href="#vaccines">Shared Vaccine Requirements (Dogs)</a><a href="#boarding-together">Shared Boarding Together Rules</a><a href="#grooming">Shared Grooming Service Names & Pricing</a><a href="#addons">Shared Add-Ons</a><a href="#differences">Where the Two Locations Differ</a></div></nav>
+<section id="locations"><div class="source-banner source-brand">Paw Sweet Paw brand standard</div><h2>Locations</h2><table>
+<thead>
+<tr>
+<th>Center ID</th>
+<th>Name</th>
+<th>Address</th>
+<th>Services</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>246</td>
+<td>Paw Sweet Paw Jamboree</td>
+<td>16811 Noyes Ave, Irvine, CA 92606</td>
+<td>Boarding, Daycamp, Grooming, Training</td>
+</tr>
+<tr>
+<td>247</td>
+<td>Paw Sweet Paw Spectrum</td>
+<td>8645 Research Drive, Irvine, CA 92618</td>
+<td>Boarding, Daycamp, Grooming</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Spectrum is the only PSP location that accepts <strong>cats</strong> and offers <strong>cat grooming</strong>. Jamboree is dogs only.</p>
+</blockquote></section>
+<section id="booking"><div class="source-banner source-brand">Paw Sweet Paw brand standard</div><h2>Website & Booking</h2><ul>
+<li><strong>Brand website:</strong> https://www.pawsweetpaw.com</li>
+<li>Camera access: pawsweetpaw.com → location page → Book Now → enter phone number → green light (top right) = camera feed</li>
+</ul></section>
+<section id="rates"><div class="source-banner source-brand">Paw Sweet Paw brand standard</div><h2>Shared Rates</h2><ul>
+<li><strong>Boarding:</strong> $89.50/night (all-inclusive)</li>
+<li>Deluxe Suites: 5'–8' wide x 7'–8' tall</li>
+<li>Family Suites: 7'–9' wide x 7'–8' tall</li>
+<li><strong>Daycare Short Day (5 hrs):</strong> $36</li>
+<li><strong>Daycare Full Day (12 hrs):</strong> $57</li>
+</ul></section>
+<section id="daycare-packages"><div class="source-banner source-brand">Paw Sweet Paw brand standard</div><h2>Shared Daycare Packages</h2><table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Short Day — 10 days</td>
+<td>$324</td>
+</tr>
+<tr>
+<td>Short Day — 20 days</td>
+<td>$612</td>
+</tr>
+<tr>
+<td>Short Day — 30 days</td>
+<td>$864</td>
+</tr>
+<tr>
+<td>Full Day — 10 days</td>
+<td>$513</td>
+</tr>
+<tr>
+<td>Full Day — 20 days</td>
+<td>$912</td>
+</tr>
+<tr>
+<td>Full Day — 30 days</td>
+<td>$1,283</td>
+</tr>
+</tbody>
+</table></section>
+<section id="training"><div class="source-banner source-brand">Paw Sweet Paw brand standard</div><h2>Shared Training Pricing</h2><ul>
+<li>Puppy: $63.60</li>
+<li>Beginner: $63.60</li>
+<li>Board and train (30 min): $55</li>
+<li>Board and train (60 min): $75</li>
+<li>Private Session: $75</li>
+<li>Stay Smart: $30</li>
+<li>Start Smart: $45</li>
+</ul></section>
+<section id="hours"><div class="source-banner source-brand">Paw Sweet Paw brand standard</div><h2>Shared Hours</h2><ul>
+<li>Mon–Fri: 7:00 AM – 7:00 PM (early drop-off from 6:30 AM; late pickup for a fee until 9:00 PM)</li>
+<li>Sat &amp; Sun: 8:00 AM – 6:00 PM</li>
+<li>Holiday hours: 8:00 AM – 6:00 PM</li>
+</ul></section>
+<section id="vaccines"><div class="source-banner source-brand">Paw Sweet Paw brand standard</div><h2>Shared Vaccine Requirements (Dogs)</h2><ul>
+<li>Rabies, Distemper, Bordetella</li>
+<li>NO HANDWRITTEN VACCINE PAPERWORK</li>
+<li>Minimum boarding age: 2 months (must have 2 rounds DHPP + Bordetella; Rabies not required if under 4 months)</li>
+</ul></section>
+<section id="boarding-together"><div class="source-banner source-brand">Paw Sweet Paw brand standard</div><h2>Shared Boarding Together Rules</h2><ul>
+<li>Must be neutered by 18 months for group play</li>
+<li>Dogs can only share overnight suites if they are <strong>siblings</strong></li>
+<li>Unspayed female and unneutered male may not be in the same group</li>
+</ul></section>
+<section id="grooming"><div class="source-banner source-brand">Paw Sweet Paw brand standard</div><h2>Shared Grooming Service Names & Pricing</h2><ul>
+<li><strong>Sweet Baths</strong> (Nail Trim + Teeth Brush + Anal Glands): S $57 / M $59.50 / L $68 / XL $69.50</li>
+<li><strong>Bath</strong> (ear cleaning only): S $39.50 / M $46.50 / L $49.50 / XL $57</li>
+<li><strong>Sweet Tidy Ups</strong> (Sweet Bath + eyes/ears/sanitary/paws — no legs or body): S $69.50 / M $79.50 / L $89.50 / XL $99.50</li>
+<li><strong>Sweet Grooms</strong> (Sweet Bath + Sweet Trim + full face/body/hand scissoring/breed cuts): S $99.50 / M $110 / L $121 / XL $131.50</li>
+<li>Grooming appointments: 7:30 AM – 4:00 PM every day</li>
+</ul></section>
+<section id="addons"><div class="source-banner source-brand">Paw Sweet Paw brand standard</div><h2>Shared Add-Ons</h2><ul>
+<li>Fetch &amp; Tug (15 min): $16</li>
+<li>Puzzle Time (15 min): $16</li>
+<li>Outdoor Stroll (10 min): $16</li>
+<li>Sniff &amp; Find (15 min): $16</li>
+<li>Cuddle Time &amp; Brush Out (15 min): $16</li>
+</ul></section>
+<section id="differences"><div class="source-banner source-brand">Paw Sweet Paw brand standard</div><h2>Where the Two Locations Differ</h2><table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Jamboree (246)</th>
+<th>Spectrum (247)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cats</td>
+<td>No</td>
+<td>Yes — boarding $46.50, 3-story condo; cat grooming $59.50 Sweet Bath</td>
+</tr>
+<tr>
+<td>Dog vaccine requirements</td>
+<td>Rabies, Distemper, Bordetella</td>
+<td>+ Influenza + Negative Fecal (within 6 months)</td>
+</tr>
+<tr>
+<td>Discounts</td>
+<td>10%/2nd pet; 20%/3rd+; 10/15/20% length stays; 25% new client first board; 20% first groom + free first week daycare</td>
+<td>Military 10%; First Responders 20%; First day daycare free</td>
+</tr>
+<tr>
+<td>Evaluations</td>
+<td>Free day, min 4 hrs</td>
+<td>Free day, booked as "First Day Free!"</td>
+</tr>
+<tr>
+<td>Tours</td>
+<td>Not specified</td>
+<td>Walk-ins during operating hours (must have account + vaccines)</td>
+</tr>
+<tr>
+<td>Add-ons — meal</td>
+<td>Add-on meal $5</td>
+<td>Not listed</td>
+</tr>
+<tr>
+<td>Add-ons — individual care</td>
+<td>Individual Care $10.50</td>
+<td>Not listed</td>
+</tr>
+<tr>
+<td>Groomers</td>
+<td>7 groomers</td>
+<td>4 groomers</td>
+</tr>
+</tbody>
+</table></section>
+<section id="knowledgebase-map"><div class="source-banner source-brand">Navigation</div><h2>Full Knowledgebase Map</h2><p>Every page and section in the Paw Sweet Paw pilot, plus the shared company standard. Link directly to any row.</p>
+<p><strong>Best Friends Standard</strong> (<a href="../best-friends-standard.html">best-friends-standard.html</a>)<br><a href="../best-friends-standard.html#what-owners-can-bring">What Owners Can Bring</a> · <a href="../best-friends-standard.html#food">Food</a> · <a href="../best-friends-standard.html#drop-off">Drop-Off</a> · <a href="../best-friends-standard.html#medication-policy">Medication Policy</a> · <a href="../best-friends-standard.html#shared-accommodations">Shared Accommodations</a> · <a href="../best-friends-standard.html#animals-we-cannot-accept">Animals We Cannot Accept</a> · <a href="../best-friends-standard.html#parasites">Parasites</a> · <a href="../best-friends-standard.html#complaints-concerns">Complaints & Concerns</a></p>
+<p><strong>Overview</strong> (<a href="index.html">index.html</a>)<br><a href="index.html#locations">Locations</a> · <a href="index.html#booking">Website & Booking</a> · <a href="index.html#rates">Shared Rates</a> · <a href="index.html#daycare-packages">Shared Daycare Packages</a> · <a href="index.html#training">Shared Training Pricing</a> · <a href="index.html#hours">Shared Hours</a> · <a href="index.html#vaccines">Shared Vaccine Requirements (Dogs)</a> · <a href="index.html#boarding-together">Shared Boarding Together Rules</a> · <a href="index.html#grooming">Shared Grooming Service Names & Pricing</a> · <a href="index.html#addons">Shared Add-Ons</a> · <a href="index.html#differences">Where the Two Locations Differ</a></p>
+<p><strong>Paw Sweet Paw Jamboree</strong> (<a href="jamboree.html">jamboree.html</a>)<br><a href="jamboree.html#identity">Identity & Contact</a> · <a href="jamboree.html#rates">Rates & Packages</a> · <a href="jamboree.html#addons">Add-On Services</a> · <a href="jamboree.html#discounts">Discounts</a> · <a href="jamboree.html#vaccines">Vaccine Requirements</a> · <a href="jamboree.html#hours">Hours of Operation</a> · <a href="jamboree.html#evaluations">Evaluations</a> · <a href="jamboree.html#tours">Tours</a> · <a href="jamboree.html#camera">Camera Access</a> · <a href="jamboree.html#boarding-together">Boarding Together Rules</a> · <a href="jamboree.html#grooming">Grooming</a> · <a href="jamboree.html#company-policies">Best Friends Pet Care Policies (linked)</a></p>
+<p><strong>Paw Sweet Paw Spectrum</strong> (<a href="spectrum.html">spectrum.html</a>)<br><a href="spectrum.html#identity">Identity & Contact</a> · <a href="spectrum.html#rates">Rates & Packages</a> · <a href="spectrum.html#addons">Add-On Services</a> · <a href="spectrum.html#discounts">Discounts</a> · <a href="spectrum.html#vaccines">Vaccine Requirements</a> · <a href="spectrum.html#hours">Hours of Operation</a> · <a href="spectrum.html#evaluations">Evaluations</a> · <a href="spectrum.html#tours">Tours</a> · <a href="spectrum.html#camera">Camera Access</a> · <a href="spectrum.html#boarding-together">Boarding Together Rules</a> · <a href="spectrum.html#grooming">Grooming</a> · <a href="spectrum.html#company-policies">Best Friends Pet Care Policies (linked)</a></p>
+</section>
+<footer>
+  Generated from the Fetch knowledge base (company defaults → Paw Sweet Paw brand → location). Every fact is tagged by source level — Location, Brand, Best Friends Standard, or a flagged Gap if no level has it on file. Company-wide policy lives once on the Best Friends Standard page and is linked from here, not duplicated. This page is generated automatically and should not be edited directly; corrections should go through the Fetch update process.
+</footer>
+</body>
+</html>
