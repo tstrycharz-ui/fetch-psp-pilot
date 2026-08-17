@@ -192,7 +192,7 @@ FULL_SCHEMA = [
 TILE_SPANS = {
     # Center Information
     "contact-info": (1, 1), "org-chart": (1, 1), "discounts": (1, 1),
-    "hours": (2, 1), "business-links": (1, 1), "tours": (3, 1),
+    "hours": (2, 2), "business-links": (1, 1), "tours": (1, 1),
     # Boarding
     "dog-accommodation": (1, 1), "cat-accommodation": (1, 1), "pocket-pet-accommodation": (1, 1),
     "vaccine-room-sharing": (2, 2), "boarding-addons": (1, 1), "boarding-cameras": (1, 1),
@@ -498,15 +498,18 @@ DASHBOARD_TEMPLATE = """<!doctype html>
     --radius: 14px; --radius-sm: 8px;
     --shadow: 0 1px 2px rgba(16,24,40,.04), 0 4px 14px rgba(16,24,40,.05);
     --scroll-shadow: rgba(0,0,0,.18);
-    --tile-h: 236px; --cols: 3;
+    --tile-h: 236px; --cols: 3; --tile-font: 1rem;
   }}
   @media (prefers-color-scheme: dark) {{
     :root {{ --ink: #e8e8ea; --bg: #121317; --panel: #1b1c22; --border: #2c2d36; --muted: #9498a3; --accent-soft: #16213f; --accent-ink: #8fb0f7; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25); --scroll-shadow: rgba(0,0,0,.55); }}
   }}
-  /* Reduced desktop window (e.g. a laptop split-screened, not maximized): drop to 2 columns, keep everything else identical. */
-  @media (max-width: 1180px) {{ :root {{ --cols: 2; --tile-h: 220px; }} }}
+  /* Reduced desktop window (e.g. a laptop split-screened, not maximized): drop to 2 columns, keep everything else identical.
+     Tile text also steps down a notch — a shorter tile with full-size text
+     just clips sooner; shrinking both together keeps more content visible
+     without scrolling instead of only shrinking the box. */
+  @media (max-width: 1180px) {{ :root {{ --cols: 2; --tile-h: 220px; --tile-font: 0.92rem; }} }}
   /* Phone/narrow tablet: stack to 1 column. Desktop stays the reference layout; this tier only needs to stay usable. */
-  @media (max-width: 720px) {{ :root {{ --cols: 1; --tile-h: 210px; }} }}
+  @media (max-width: 720px) {{ :root {{ --cols: 1; --tile-h: 210px; --tile-font: 0.85rem; }} }}
 
   * {{ box-sizing: border-box; }}
   html, body {{ height: 100%; margin: 0; }}
@@ -544,12 +547,25 @@ DASHBOARD_TEMPLATE = """<!doctype html>
      otherwise strand an empty cell and push the whole tab a row taller
      than it needs to be — dense closes that gap automatically). */
   .dash-grid {{ display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-auto-rows: var(--tile-h); grid-auto-flow: dense; gap: 16px; }}
+  /* .tile is a fixed, non-scrolling shell — it owns the border/shadow/radius
+     and clips its corners. .tile-scroll is the actual scrolling element
+     inside it. Splitting these into two elements (rather than making .tile
+     itself scroll) is what lets .scroll-hint stay visually pinned to the
+     bottom of the tile as you scroll: it's a sibling of .tile-scroll, not a
+     descendant of it, so scrolling the inner content never moves it. */
   .tile {{
     grid-column: span min(var(--tcols, 1), var(--cols));
     grid-row: span var(--trows, 1);
     position: relative;
     border: 1px solid var(--border); box-shadow: var(--shadow);
-    border-radius: var(--radius); padding: 16px 18px; overflow-y: auto;
+    border-radius: var(--radius); overflow: hidden;
+  }}
+  .tile-scroll {{
+    height: 100%; overflow-y: auto; padding: 16px 18px;
+    /* Base size for everything inside a tile (h2/h3/table/banner/etc below
+       are set in `em`, not `rem`, specifically so they scale off THIS —
+       shrinking --tile-font at a breakpoint shrinks all of them together). */
+    font-size: var(--tile-font);
     /* Scroll-shadow trick: a "cover" gradient (matches the panel color,
        scrolls WITH the content via background-attachment:local) sits
        exactly over a "shadow" gradient (fixed to the box via
@@ -568,20 +584,35 @@ DASHBOARD_TEMPLATE = """<!doctype html>
     background-size: 100% 28px, 100% 28px, 100% 12px, 100% 12px;
     background-position: top, bottom, top, bottom;
     background-attachment: local, local, scroll, scroll;
+    /* Force a persistent, always-rendered scrollbar (not an auto-hiding
+       overlay one) wherever a tile actually needs to scroll. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted) transparent;
   }}
+  .tile-scroll::-webkit-scrollbar {{ width: 8px; }}
+  .tile-scroll::-webkit-scrollbar-track {{ background: transparent; }}
+  .tile-scroll::-webkit-scrollbar-thumb {{ background-color: var(--border); border-radius: 4px; }}
+  .tile-scroll::-webkit-scrollbar-thumb:hover {{ background-color: var(--muted); }}
   .scroll-hint {{ display: none; position: absolute; left: 0; right: 0; bottom: 6px; justify-content: center; pointer-events: none; }}
-  .tile.has-overflow .scroll-hint {{ display: flex; }}
-  .scroll-hint span {{ background: var(--accent-soft); color: var(--accent-ink); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.02em; padding: 3px 10px; border-radius: 999px; box-shadow: 0 1px 4px rgba(0,0,0,.18); }}
-  .tile h2 {{ font-size: 0.98rem; margin: 2px 0 8px; }}
-  .tile h3 {{ font-size: 0.86rem; margin: 1em 0 4px; }}
+  /* Shown only while the tile has more content than fits AND the user
+     hasn't already scrolled to the end of it (has-overflow / at-bottom are
+     toggled by JS — see the script below). */
+  .tile.has-overflow:not(.at-bottom) .scroll-hint {{ display: flex; }}
+  /* Everything below is sized in `em`, not `rem` — deliberately, so it
+     scales off .tile-scroll's own font-size (--tile-font) rather than the
+     document root. That's what makes a breakpoint's smaller --tile-font
+     shrink every bit of tile content together, not just the box around it. */
+  .scroll-hint span {{ background: var(--accent-soft); color: var(--accent-ink); font-size: 0.66em; font-weight: 700; letter-spacing: 0.02em; padding: 3px 10px; border-radius: 999px; box-shadow: 0 1px 4px rgba(0,0,0,.18); }}
+  .tile h2 {{ font-size: 0.98em; margin: 2px 0 8px; }}
+  .tile h3 {{ font-size: 0.86em; margin: 1em 0 4px; }}
   .tile h3:first-of-type {{ margin-top: 0.2em; }}
-  .tile table {{ border-collapse: collapse; width: 100%; font-size: 0.83rem; margin: 0.5em 0; }}
+  .tile table {{ border-collapse: collapse; width: 100%; font-size: 0.83em; margin: 0.5em 0; }}
   .tile th, .tile td {{ border: 1px solid var(--border); padding: 5px 9px; text-align: left; }}
   .tile th {{ background: var(--bg); position: sticky; top: 0; }}
   .tile ul {{ margin: 0.35em 0; padding-left: 1.2em; line-height: 1.5; }}
   .tile li {{ margin-bottom: 2px; }}
   .tile p {{ margin: 0.45em 0; line-height: 1.5; }}
-  .source-banner {{ display: inline-block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; margin: 0 0 8px; }}
+  .source-banner {{ display: inline-block; font-size: 0.66em; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; margin: 0 0 8px; }}
   .source-location {{ background: #e6f4ea; color: #1a7431; }}
   .source-brand {{ background: var(--accent-soft); color: var(--accent-ink); }}
   .source-default {{ background: #f4eee3; color: #7a5b1e; }}
@@ -595,13 +626,13 @@ DASHBOARD_TEMPLATE = """<!doctype html>
   }}
   .gap-note {{ font-style: italic; color: #9c2b2b; }}
   @media (prefers-color-scheme: dark) {{ .gap-note {{ color: #f0a3a3; }} }}
-  .reference-note {{ color: var(--muted); font-size: 0.85rem; }}
-  .conflict-note {{ background: #fff4e5; border: 1px solid #f0d9a8; border-radius: 8px; padding: 8px 12px; font-size: 0.8rem; margin: 8px 0; color: #7a5b1e; }}
+  .reference-note {{ color: var(--muted); font-size: 0.85em; }}
+  .conflict-note {{ background: #fff4e5; border: 1px solid #f0d9a8; border-radius: 8px; padding: 8px 12px; font-size: 0.8em; margin: 8px 0; color: #7a5b1e; }}
   @media (prefers-color-scheme: dark) {{ .conflict-note {{ background: #332a15; border-color: #4a3d20; color: #e0bb6a; }} }}
-  .kv {{ margin: 0.3em 0; font-size: 0.85rem; line-height: 1.5; }}
+  .kv {{ margin: 0.3em 0; font-size: 0.85em; line-height: 1.5; }}
   .kv b {{ font-weight: 600; }}
   .toc-links {{ display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }}
-  .toc-links a {{ display: inline-block; color: var(--accent-ink); background: var(--accent-soft); text-decoration: none; padding: 5px 12px; border-radius: 999px; font-size: 0.8rem; }}
+  .toc-links a {{ display: inline-block; color: var(--accent-ink); background: var(--accent-soft); text-decoration: none; padding: 5px 12px; border-radius: 999px; font-size: 0.8em; }}
   .toc-links a.gap-link {{ color: #9c2b2b; background: #fbe7e7; }}
   @media (prefers-color-scheme: dark) {{ .toc-links a.gap-link {{ color: #f0a3a3; background: #3a1717; }} }}
 </style>
@@ -626,13 +657,23 @@ DASHBOARD_TEMPLATE = """<!doctype html>
 (function() {{
   var buttons = document.querySelectorAll('.tab-btn');
   var panels = document.querySelectorAll('.panel');
+  function updateAtBottom(scrollEl) {{
+    var tile = scrollEl.closest('.tile');
+    var atBottom = scrollEl.scrollTop + scrollEl.clientHeight >= scrollEl.scrollHeight - 2;
+    tile.classList.toggle('at-bottom', atBottom);
+  }}
   // A tile's real scrollHeight can only be measured once its panel is
   // actually laid out (display:none panels report 0), so this runs every
   // time a panel becomes active, plus again on resize since the 2-col/
   // 1-col breakpoints change --tile-h and can flip a tile's overflow state.
   function markOverflowingTiles(panel) {{
-    panel.querySelectorAll('.tile').forEach(function(t) {{
-      t.classList.toggle('has-overflow', t.scrollHeight > t.clientHeight + 1);
+    panel.querySelectorAll('.tile-scroll').forEach(function(el) {{
+      el.closest('.tile').classList.toggle('has-overflow', el.scrollHeight > el.clientHeight + 1);
+      updateAtBottom(el);
+      if (!el.dataset.scrollBound) {{
+        el.dataset.scrollBound = '1';
+        el.addEventListener('scroll', function() {{ updateAtBottom(el); }});
+      }}
     }});
   }}
   function activate(key) {{
@@ -669,11 +710,19 @@ def dashboard_tile(key, title, source_label, html_or_gap_text):
     # A <div> wrapper (not <p>) — gap content is already-converted markdown
     # that may itself contain <p> tags, and nesting <p> inside <p> is invalid HTML.
     body = f'<div class="gap-note">{html_or_gap_text}</div>' if source_label == "gap" else html_or_gap_text
-    # has-overflow is toggled by JS (see DASHBOARD_TEMPLATE's script) once the
-    # tile's actual content height is known; the hint markup is always
-    # present but only shown via that class, so a tile that fits needs no cue.
+    # has-overflow/at-bottom are toggled by JS (see DASHBOARD_TEMPLATE's
+    # script) once the tile's actual content height/scroll position is
+    # known; the hint markup is always present but only shown via those
+    # classes, so a tile that fits (or is scrolled to its end) needs no cue.
+    # .scroll-hint is a SIBLING of .tile-scroll, not nested inside it, so it
+    # stays visually pinned to the tile's bottom edge as the inner content scrolls.
     scroll_hint = '<div class="scroll-hint"><span>Scroll for more ▾</span></div>'
-    return f'<div class="tile" style="--tcols:{cols};--trows:{rows}">{banner}<h2>{title}</h2>{body}{scroll_hint}</div>'
+    return (
+        f'<div class="tile" style="--tcols:{cols};--trows:{rows}">'
+        f'<div class="tile-scroll">{banner}<h2>{title}</h2>{body}</div>'
+        f'{scroll_hint}'
+        f'</div>'
+    )
 
 
 def _kv(label, value):
