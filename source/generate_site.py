@@ -593,16 +593,37 @@ DASHBOARD_TEMPLATE = """<!doctype html>
   .tile-scroll::-webkit-scrollbar-track {{ background: transparent; }}
   .tile-scroll::-webkit-scrollbar-thumb {{ background-color: var(--border); border-radius: 4px; }}
   .tile-scroll::-webkit-scrollbar-thumb:hover {{ background-color: var(--muted); }}
+  /* On a touch screen, a swipe that lands on a small scrollable tile can
+     get "trapped" there instead of scrolling the page — confusing, since
+     nothing visually marks that tile as special. So on phone-width screens
+     a tile starts locked (overflow: hidden — a swipe over it just scrolls
+     the page like everywhere else) and only becomes swipe-scrollable once
+     its "Click to scroll" pill is tapped (JS below adds .scroll-unlocked).
+     Desktop/tablet never lock — a mouse wheel over a tile is normal,
+     expected behavior there, not a gesture that needs unlocking first. */
+  @media (max-width: 720px) {{
+    .tile-scroll {{ overflow-y: hidden; }}
+    .tile-scroll.scroll-unlocked {{ overflow-y: auto; }}
+  }}
   .scroll-hint {{ display: none; position: absolute; left: 0; right: 0; bottom: 6px; justify-content: center; pointer-events: none; }}
   /* Shown only while the tile has more content than fits AND the user
      hasn't already scrolled to the end of it (has-overflow / at-bottom are
      toggled by JS — see the script below). */
   .tile.has-overflow:not(.at-bottom) .scroll-hint {{ display: flex; }}
+  /* The pill itself is clickable (unlocks + nudges the tile's scroll
+     position) even though the wrapping .scroll-hint div is click-through,
+     so it doesn't block whatever's underneath it on the sides of the pill. */
+  .scroll-hint .hint-pill {{ pointer-events: auto; cursor: pointer; }}
+  .hint-mobile {{ display: none; }}
+  @media (max-width: 720px) {{
+    .hint-desktop {{ display: none; }}
+    .hint-mobile {{ display: inline; }}
+  }}
   /* Everything below is sized in `em`, not `rem` — deliberately, so it
      scales off .tile-scroll's own font-size (--tile-font) rather than the
      document root. That's what makes a breakpoint's smaller --tile-font
      shrink every bit of tile content together, not just the box around it. */
-  .scroll-hint span {{ background: var(--accent-soft); color: var(--accent-ink); font-size: 0.66em; font-weight: 700; letter-spacing: 0.02em; padding: 3px 10px; border-radius: 999px; box-shadow: 0 1px 4px rgba(0,0,0,.18); }}
+  .hint-pill {{ background: var(--accent-soft); color: var(--accent-ink); font-size: 0.66em; font-weight: 700; letter-spacing: 0.02em; padding: 3px 10px; border-radius: 999px; box-shadow: 0 1px 4px rgba(0,0,0,.18); }}
   .tile h2 {{ font-size: 0.98em; margin: 2px 0 8px; }}
   .tile h3 {{ font-size: 0.86em; margin: 1em 0 4px; }}
   .tile h3:first-of-type {{ margin-top: 0.2em; }}
@@ -694,6 +715,17 @@ DASHBOARD_TEMPLATE = """<!doctype html>
     var activePanel = document.querySelector('.panel.active');
     if (activePanel) markOverflowingTiles(activePanel);
   }});
+  // Tapping the hint pill unlocks that tile for swipe-scrolling (see the
+  // .tile-scroll / .scroll-unlocked CSS above) and nudges it down a bit as
+  // an immediate, obvious confirmation that it worked. One delegated
+  // listener covers every tile, including ones not yet visited.
+  document.addEventListener('click', function(e) {{
+    var pill = e.target.closest('.hint-pill');
+    if (!pill) return;
+    var sc = pill.closest('.tile').querySelector('.tile-scroll');
+    sc.classList.add('scroll-unlocked');
+    sc.scrollBy({{ top: sc.clientHeight * 0.8, behavior: 'smooth' }});
+  }});
   var initial = (location.hash || '').replace('#', '') || buttons[0].dataset.tab;
   if (![].some.call(buttons, function(b) {{ return b.dataset.tab === initial; }})) {{ initial = buttons[0].dataset.tab; }}
   activate(initial);
@@ -716,7 +748,12 @@ def dashboard_tile(key, title, source_label, html_or_gap_text):
     # classes, so a tile that fits (or is scrolled to its end) needs no cue.
     # .scroll-hint is a SIBLING of .tile-scroll, not nested inside it, so it
     # stays visually pinned to the tile's bottom edge as the inner content scrolls.
-    scroll_hint = '<div class="scroll-hint"><span>Scroll for more ▾</span></div>'
+    scroll_hint = (
+        '<div class="scroll-hint"><span class="hint-pill">'
+        '<span class="hint-desktop">Scroll for more ▾</span>'
+        '<span class="hint-mobile">Click to scroll ▾</span>'
+        '</span></div>'
+    )
     return (
         f'<div class="tile" style="--tcols:{cols};--trows:{rows}">'
         f'<div class="tile-scroll">{banner}<h2>{title}</h2>{body}</div>'
