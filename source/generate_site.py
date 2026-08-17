@@ -194,8 +194,8 @@ TILE_SPANS = {
     "contact-info": (1, 1), "org-chart": (1, 1), "discounts": (1, 1),
     "hours": (2, 2), "business-links": (1, 1), "tours": (1, 1),
     # Boarding
-    "dog-accommodation": (1, 1), "cat-accommodation": (1, 1), "pocket-pet-accommodation": (1, 1),
-    "vaccine-room-sharing": (2, 2), "boarding-addons": (1, 1), "boarding-cameras": (1, 1),
+    "dog-accommodation": (2, 2), "cat-accommodation": (1, 1), "pocket-pet-accommodation": (1, 1),
+    "vaccine-room-sharing": (1, 1), "boarding-addons": (1, 1), "boarding-cameras": (1, 1),
     # Daycare
     "daycare-pricing": (2, 1), "group-play": (1, 1),
     "evaluation": (1, 2), "vaccine-spay-neuter": (1, 2),
