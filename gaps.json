@@ -1,6 +1,50 @@
 [
   {
     "page": "jamboree",
-    "section": "Tours"
+    "section": "Tour Information"
+  },
+  {
+    "page": "jamboree",
+    "section": "Cat Accommodation Options"
+  },
+  {
+    "page": "jamboree",
+    "section": "Pocket Pet Accommodation Options"
+  },
+  {
+    "page": "jamboree",
+    "section": "Center Trainer"
+  },
+  {
+    "page": "jamboree",
+    "section": "Dog Training Interest Form"
+  },
+  {
+    "page": "jamboree",
+    "section": "Bathers"
+  },
+  {
+    "page": "jamboree",
+    "section": "Grooming Add-On/Package Options"
+  },
+  {
+    "page": "spectrum",
+    "section": "Pocket Pet Accommodation Options"
+  },
+  {
+    "page": "spectrum",
+    "section": "Center Trainer"
+  },
+  {
+    "page": "spectrum",
+    "section": "Dog Training Interest Form"
+  },
+  {
+    "page": "spectrum",
+    "section": "Bathers"
+  },
+  {
+    "page": "spectrum",
+    "section": "Grooming Add-On/Package Options"
   }
 ]
