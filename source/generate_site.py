@@ -497,10 +497,11 @@ DASHBOARD_TEMPLATE = """<!doctype html>
     --muted: #767a85; --accent: #0a6cff; --accent-soft: #e8eefc; --accent-ink: #24478f;
     --radius: 14px; --radius-sm: 8px;
     --shadow: 0 1px 2px rgba(16,24,40,.04), 0 4px 14px rgba(16,24,40,.05);
+    --scroll-shadow: rgba(0,0,0,.18);
     --tile-h: 236px; --cols: 3;
   }}
   @media (prefers-color-scheme: dark) {{
-    :root {{ --ink: #e8e8ea; --bg: #121317; --panel: #1b1c22; --border: #2c2d36; --muted: #9498a3; --accent-soft: #16213f; --accent-ink: #8fb0f7; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25); }}
+    :root {{ --ink: #e8e8ea; --bg: #121317; --panel: #1b1c22; --border: #2c2d36; --muted: #9498a3; --accent-soft: #16213f; --accent-ink: #8fb0f7; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25); --scroll-shadow: rgba(0,0,0,.55); }}
   }}
   /* Reduced desktop window (e.g. a laptop split-screened, not maximized): drop to 2 columns, keep everything else identical. */
   @media (max-width: 1180px) {{ :root {{ --cols: 2; --tile-h: 220px; }} }}
@@ -537,14 +538,40 @@ DASHBOARD_TEMPLATE = """<!doctype html>
      (cols,rows) span is set inline per-component and stays constant across
      every location's dashboard — only the number of grid columns adapts
      by breakpoint. Content that doesn't fill a tile just leaves it empty;
-     content that overflows scrolls inside the tile, never resizes it. */
-  .dash-grid {{ display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-auto-rows: var(--tile-h); gap: 16px; }}
+     content that overflows scrolls inside the tile, never resizes it.
+     `dense` packing lets a later, narrower tile backfill a gap left by an
+     earlier wide/tall one (e.g. a 2-wide tile after two 1-wide tiles would
+     otherwise strand an empty cell and push the whole tab a row taller
+     than it needs to be — dense closes that gap automatically). */
+  .dash-grid {{ display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-auto-rows: var(--tile-h); grid-auto-flow: dense; gap: 16px; }}
   .tile {{
     grid-column: span min(var(--tcols, 1), var(--cols));
     grid-row: span var(--trows, 1);
-    background: var(--panel); border: 1px solid var(--border); box-shadow: var(--shadow);
+    position: relative;
+    border: 1px solid var(--border); box-shadow: var(--shadow);
     border-radius: var(--radius); padding: 16px 18px; overflow-y: auto;
+    /* Scroll-shadow trick: a "cover" gradient (matches the panel color,
+       scrolls WITH the content via background-attachment:local) sits
+       exactly over a "shadow" gradient (fixed to the box via
+       background-attachment:scroll). At rest — nothing to scroll, or
+       already scrolled all the way — the cover fully hides the shadow.
+       As soon as there's more content in that direction, the cover slides
+       out of the way and the shadow becomes visible. No JS needed, and it
+       tracks scroll position live. */
+    background-color: var(--panel);
+    background-image:
+      linear-gradient(var(--panel) 30%, transparent),
+      linear-gradient(transparent, var(--panel) 70%),
+      radial-gradient(farthest-side at 50% 0, var(--scroll-shadow), transparent),
+      radial-gradient(farthest-side at 50% 100%, var(--scroll-shadow), transparent);
+    background-repeat: no-repeat;
+    background-size: 100% 28px, 100% 28px, 100% 12px, 100% 12px;
+    background-position: top, bottom, top, bottom;
+    background-attachment: local, local, scroll, scroll;
   }}
+  .scroll-hint {{ display: none; position: absolute; left: 0; right: 0; bottom: 6px; justify-content: center; pointer-events: none; }}
+  .tile.has-overflow .scroll-hint {{ display: flex; }}
+  .scroll-hint span {{ background: var(--accent-soft); color: var(--accent-ink); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.02em; padding: 3px 10px; border-radius: 999px; box-shadow: 0 1px 4px rgba(0,0,0,.18); }}
   .tile h2 {{ font-size: 0.98rem; margin: 2px 0 8px; }}
   .tile h3 {{ font-size: 0.86rem; margin: 1em 0 4px; }}
   .tile h3:first-of-type {{ margin-top: 0.2em; }}
@@ -599,15 +626,32 @@ DASHBOARD_TEMPLATE = """<!doctype html>
 (function() {{
   var buttons = document.querySelectorAll('.tab-btn');
   var panels = document.querySelectorAll('.panel');
+  // A tile's real scrollHeight can only be measured once its panel is
+  // actually laid out (display:none panels report 0), so this runs every
+  // time a panel becomes active, plus again on resize since the 2-col/
+  // 1-col breakpoints change --tile-h and can flip a tile's overflow state.
+  function markOverflowingTiles(panel) {{
+    panel.querySelectorAll('.tile').forEach(function(t) {{
+      t.classList.toggle('has-overflow', t.scrollHeight > t.clientHeight + 1);
+    }});
+  }}
   function activate(key) {{
     buttons.forEach(function(b) {{ b.classList.toggle('active', b.dataset.tab === key); }});
-    panels.forEach(function(p) {{ p.classList.toggle('active', p.dataset.tab === key); }});
+    panels.forEach(function(p) {{
+      var isActive = p.dataset.tab === key;
+      p.classList.toggle('active', isActive);
+      if (isActive) markOverflowingTiles(p);
+    }});
   }}
   buttons.forEach(function(b) {{
     b.addEventListener('click', function() {{
       activate(b.dataset.tab);
       history.replaceState(null, '', '#' + b.dataset.tab);
     }});
+  }});
+  window.addEventListener('resize', function() {{
+    var activePanel = document.querySelector('.panel.active');
+    if (activePanel) markOverflowingTiles(activePanel);
   }});
   var initial = (location.hash || '').replace('#', '') || buttons[0].dataset.tab;
   if (![].some.call(buttons, function(b) {{ return b.dataset.tab === initial; }})) {{ initial = buttons[0].dataset.tab; }}
@@ -625,7 +669,11 @@ def dashboard_tile(key, title, source_label, html_or_gap_text):
     # A <div> wrapper (not <p>) — gap content is already-converted markdown
     # that may itself contain <p> tags, and nesting <p> inside <p> is invalid HTML.
     body = f'<div class="gap-note">{html_or_gap_text}</div>' if source_label == "gap" else html_or_gap_text
-    return f'<div class="tile" style="--tcols:{cols};--trows:{rows}">{banner}<h2>{title}</h2>{body}</div>'
+    # has-overflow is toggled by JS (see DASHBOARD_TEMPLATE's script) once the
+    # tile's actual content height is known; the hint markup is always
+    # present but only shown via that class, so a tile that fits needs no cue.
+    scroll_hint = '<div class="scroll-hint"><span>Scroll for more ▾</span></div>'
+    return f'<div class="tile" style="--tcols:{cols};--trows:{rows}">{banner}<h2>{title}</h2>{body}{scroll_hint}</div>'
 
 
 def _kv(label, value):

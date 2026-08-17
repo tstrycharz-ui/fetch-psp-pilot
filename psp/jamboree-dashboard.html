@@ -12,10 +12,11 @@
     --muted: #767a85; --accent: #0a6cff; --accent-soft: #e8eefc; --accent-ink: #24478f;
     --radius: 14px; --radius-sm: 8px;
     --shadow: 0 1px 2px rgba(16,24,40,.04), 0 4px 14px rgba(16,24,40,.05);
+    --scroll-shadow: rgba(0,0,0,.18);
     --tile-h: 236px; --cols: 3;
   }
   @media (prefers-color-scheme: dark) {
-    :root { --ink: #e8e8ea; --bg: #121317; --panel: #1b1c22; --border: #2c2d36; --muted: #9498a3; --accent-soft: #16213f; --accent-ink: #8fb0f7; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25); }
+    :root { --ink: #e8e8ea; --bg: #121317; --panel: #1b1c22; --border: #2c2d36; --muted: #9498a3; --accent-soft: #16213f; --accent-ink: #8fb0f7; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 14px rgba(0,0,0,.25); --scroll-shadow: rgba(0,0,0,.55); }
   }
   /* Reduced desktop window (e.g. a laptop split-screened, not maximized): drop to 2 columns, keep everything else identical. */
   @media (max-width: 1180px) { :root { --cols: 2; --tile-h: 220px; } }
@@ -52,14 +53,40 @@
      (cols,rows) span is set inline per-component and stays constant across
      every location's dashboard — only the number of grid columns adapts
      by breakpoint. Content that doesn't fill a tile just leaves it empty;
-     content that overflows scrolls inside the tile, never resizes it. */
-  .dash-grid { display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-auto-rows: var(--tile-h); gap: 16px; }
+     content that overflows scrolls inside the tile, never resizes it.
+     `dense` packing lets a later, narrower tile backfill a gap left by an
+     earlier wide/tall one (e.g. a 2-wide tile after two 1-wide tiles would
+     otherwise strand an empty cell and push the whole tab a row taller
+     than it needs to be — dense closes that gap automatically). */
+  .dash-grid { display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-auto-rows: var(--tile-h); grid-auto-flow: dense; gap: 16px; }
   .tile {
     grid-column: span min(var(--tcols, 1), var(--cols));
     grid-row: span var(--trows, 1);
-    background: var(--panel); border: 1px solid var(--border); box-shadow: var(--shadow);
+    position: relative;
+    border: 1px solid var(--border); box-shadow: var(--shadow);
     border-radius: var(--radius); padding: 16px 18px; overflow-y: auto;
+    /* Scroll-shadow trick: a "cover" gradient (matches the panel color,
+       scrolls WITH the content via background-attachment:local) sits
+       exactly over a "shadow" gradient (fixed to the box via
+       background-attachment:scroll). At rest — nothing to scroll, or
+       already scrolled all the way — the cover fully hides the shadow.
+       As soon as there's more content in that direction, the cover slides
+       out of the way and the shadow becomes visible. No JS needed, and it
+       tracks scroll position live. */
+    background-color: var(--panel);
+    background-image:
+      linear-gradient(var(--panel) 30%, transparent),
+      linear-gradient(transparent, var(--panel) 70%),
+      radial-gradient(farthest-side at 50% 0, var(--scroll-shadow), transparent),
+      radial-gradient(farthest-side at 50% 100%, var(--scroll-shadow), transparent);
+    background-repeat: no-repeat;
+    background-size: 100% 28px, 100% 28px, 100% 12px, 100% 12px;
+    background-position: top, bottom, top, bottom;
+    background-attachment: local, local, scroll, scroll;
   }
+  .scroll-hint { display: none; position: absolute; left: 0; right: 0; bottom: 6px; justify-content: center; pointer-events: none; }
+  .tile.has-overflow .scroll-hint { display: flex; }
+  .scroll-hint span { background: var(--accent-soft); color: var(--accent-ink); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.02em; padding: 3px 10px; border-radius: 999px; box-shadow: 0 1px 4px rgba(0,0,0,.18); }
   .tile h2 { font-size: 0.98rem; margin: 2px 0 8px; }
   .tile h3 { font-size: 0.86rem; margin: 1em 0 4px; }
   .tile h3:first-of-type { margin-top: 0.2em; }
@@ -108,22 +135,22 @@
 
   <div class="tabs"><button class="tab-btn" data-tab="center-info">Center Information<span class="flag" title="Contains a gap"></span></button><button class="tab-btn" data-tab="boarding">Boarding<span class="flag" title="Contains a gap"></span></button><button class="tab-btn" data-tab="daycare">Daycare</button><button class="tab-btn" data-tab="training">Training<span class="flag" title="Contains a gap"></span></button><button class="tab-btn" data-tab="grooming">Grooming<span class="flag" title="Contains a gap"></span></button><button class="tab-btn" data-tab="policies">Policies & Procedures</button></div>
 
-  <div class="content"><div class="panel" data-tab="center-info"><div class="dash-grid"><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-system">Center info system (CSV)</div><h2>Contact Info</h2><p class="kv"><b>Address:</b> 16811 Noyes Ave., Irvine, CA 92606</p><p class="kv"><b>Direct center number:</b> (949) 333-1465</p><p class="kv"><b>MoeGo texting number:</b> (845) 704-4881</p><p class="kv"><b>Location email:</b> JAM@bestfriends.net</p><p class="kv"><b>Group Manager email:</b> <span class="gap-note">Not on file</span></p><p class="kv"><b>Call center number for location:</b> <span class="gap-note">Not on file</span></p></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Organizational Chart</h2><p><em>Placeholder — Center Manager and org chart (Assistant Manager, District Manager, Director) intentionally left out for now, pending a single confirmed source. See the project's open-questions.md for the specific item to verify before this is filled back in.</em></p></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Discounts Offered</h2><ul>
+  <div class="content"><div class="panel" data-tab="center-info"><div class="dash-grid"><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-system">Center info system (CSV)</div><h2>Contact Info</h2><p class="kv"><b>Address:</b> 16811 Noyes Ave., Irvine, CA 92606</p><p class="kv"><b>Direct center number:</b> (949) 333-1465</p><p class="kv"><b>MoeGo texting number:</b> (845) 704-4881</p><p class="kv"><b>Location email:</b> JAM@bestfriends.net</p><p class="kv"><b>Group Manager email:</b> <span class="gap-note">Not on file</span></p><p class="kv"><b>Call center number for location:</b> <span class="gap-note">Not on file</span></p><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Organizational Chart</h2><p><em>Placeholder — Center Manager and org chart (Assistant Manager, District Manager, Director) intentionally left out for now, pending a single confirmed source. See the project's open-questions.md for the specific item to verify before this is filled back in.</em></p><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Discounts Offered</h2><ul>
 <li>10% off second pet; 20% off each additional pet after that</li>
 <li>10% off 7+ nights; 15% off 14+ nights; 20% off 21+ nights</li>
 <li>New clients: 25% off first board</li>
 <li>20% off first groom + first week of daycare free — must be used within 7 days (do not need to use all 7)</li>
-</ul></div><div class="tile" style="--tcols:2;--trows:1"><div class="source-banner source-system">Center info system (CSV)</div><h2>Hours of Operation</h2><table><thead><tr><th>Day</th><th>Hours</th></tr></thead><tbody><tr><td>Sunday</td><td>8:00 AM - 6:00 PM</td></tr><tr><td>Monday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Tuesday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Wednesday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Thursday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Friday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Saturday</td><td>8:00 AM - 6:00 PM</td></tr></tbody></table><p class="kv"><b>Special Hours:</b> Front desk is closed on all major holidays.</p><h3>Check-in / Check-out Details</h3><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:2;--trows:1"><div class="source-banner source-system">Center info system (CSV)</div><h2>Hours of Operation</h2><table><thead><tr><th>Day</th><th>Hours</th></tr></thead><tbody><tr><td>Sunday</td><td>8:00 AM - 6:00 PM</td></tr><tr><td>Monday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Tuesday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Wednesday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Thursday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Friday</td><td>7:00 AM - 7:00 PM</td></tr><tr><td>Saturday</td><td>8:00 AM - 6:00 PM</td></tr></tbody></table><p class="kv"><b>Special Hours:</b> Front desk is closed on all major holidays.</p><h3>Check-in / Check-out Details</h3><ul>
 <li><strong>Mon–Fri:</strong> 7:00 AM – 7:00 PM (early drop-off from 6:30 AM; late pick-up for a fee until 9:00 PM)</li>
 <li><strong>Sat &amp; Sun:</strong> 8:00 AM – 6:00 PM</li>
 <li><strong>Check-in/check-out times:</strong> Standard drop-off/pick-up within operating hours above; early drop-off (6:30 AM) and late pick-up (until 9:00 PM) both available for a fee — no fee amount on file</li>
 <li><strong>Holiday Hours (8:00 AM – 6:00 PM):</strong> January 1 (New Year's Day), May 26 (Memorial Day), July 4 (Independence Day), September 1 (Labor Day), November 27 (Thanksgiving), November 28 (Black Friday), December 24 (Christmas Eve), December 25 (Christmas Day), December 31 (New Year's Eve)</li>
-</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-system">Center info system (CSV)</div><h2>Business Links</h2><p class="kv"><b>Website:</b> <a href="https://www.pawsweetpaw.com/" target="_blank" rel="noopener">https://www.pawsweetpaw.com/</a></p><p class="kv"><b>Book Now (customers):</b> <a href="https://booking.moego.pet/ol/landing?name=246247PawSweetPaw" target="_blank" rel="noopener">Book Now</a></p><p class="kv"><b>POS Direct Login (internal):</b> <a href="https://go.moego.pet/home/overview?%7Ec=126757&%7Eb=127473" target="_blank" rel="noopener">MoeGo Link</a></p><p class="kv"><b>Google Business Profile:</b> <a href="https://share.google/vqiwpnyIbNSiZ2yWj" target="_blank" rel="noopener">View listing</a></p><p class="kv"><b>Leave a Review:</b> <a href="https://g.page/r/CRPKmYefs77hEBM/review" target="_blank" rel="noopener">Review link</a></p><p class="kv"><b>Facebook:</b> <a href="https://www.facebook.com/pawsweetpaw" target="_blank" rel="noopener">Open</a></p><p class="kv"><b>Instagram:</b> <a href="https://www.instagram.com/pawsweetpaw/" target="_blank" rel="noopener">Open</a></p><p class="kv"><b>TikTok:</b> <a href="https://www.tiktok.com/@pawsweetpaw" target="_blank" rel="noopener">Open</a></p></div><div class="tile" style="--tcols:3;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Tour Information</h2><div class="gap-note"><p><em>Not on file — the source material documents an Evaluations process (see Daycare) but no separate walk-in tour policy for Jamboree specifically. Spectrum's file has an explicit tours answer; confirm whether Jamboree follows the same policy or is a genuine gap.</em></p></div></div></div></div><div class="panel" data-tab="boarding"><div class="dash-grid"><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Dog Accommodation Options</h2><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-system">Center info system (CSV)</div><h2>Business Links</h2><p class="kv"><b>Website:</b> <a href="https://www.pawsweetpaw.com/" target="_blank" rel="noopener">https://www.pawsweetpaw.com/</a></p><p class="kv"><b>Book Now (customers):</b> <a href="https://booking.moego.pet/ol/landing?name=246247PawSweetPaw" target="_blank" rel="noopener">Book Now</a></p><p class="kv"><b>POS Direct Login (internal):</b> <a href="https://go.moego.pet/home/overview?%7Ec=126757&%7Eb=127473" target="_blank" rel="noopener">MoeGo Link</a></p><p class="kv"><b>Google Business Profile:</b> <a href="https://share.google/vqiwpnyIbNSiZ2yWj" target="_blank" rel="noopener">View listing</a></p><p class="kv"><b>Leave a Review:</b> <a href="https://g.page/r/CRPKmYefs77hEBM/review" target="_blank" rel="noopener">Review link</a></p><p class="kv"><b>Facebook:</b> <a href="https://www.facebook.com/pawsweetpaw" target="_blank" rel="noopener">Open</a></p><p class="kv"><b>Instagram:</b> <a href="https://www.instagram.com/pawsweetpaw/" target="_blank" rel="noopener">Open</a></p><p class="kv"><b>TikTok:</b> <a href="https://www.tiktok.com/@pawsweetpaw" target="_blank" rel="noopener">Open</a></p><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:3;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Tour Information</h2><div class="gap-note"><p><em>Not on file — the source material documents an Evaluations process (see Daycare) but no separate walk-in tour policy for Jamboree specifically. Spectrum's file has an explicit tours answer; confirm whether Jamboree follows the same policy or is a genuine gap.</em></p></div><div class="scroll-hint"><span>Scroll for more ▾</span></div></div></div></div><div class="panel" data-tab="boarding"><div class="dash-grid"><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Dog Accommodation Options</h2><ul>
 <li><strong>All-inclusive boarding:</strong> $89.50/night (grouped by size and temperament, rotated regularly throughout the day)</li>
 <li>Deluxe Suites: 5'–8' wide x 7'–8' tall</li>
 <li>Family Suites: 7'–9' wide x 7'–8' tall</li>
 <li>Youngest age accepted to board: 2 months — must have at least two rounds of DHPP and Bordetella. Rabies should not be given before 4 months; accepted if not yet given and pet is under age.</li>
-</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Cat Accommodation Options</h2><div class="gap-note"><p><em>Not offered — Jamboree is dogs only.</em></p></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Pocket Pet Accommodation Options</h2><div class="gap-note"><p><em>Not on file — no pocket pet boarding documented for this location.</em></p></div></div><div class="tile" style="--tcols:2;--trows:2"><div class="source-banner source-location">Location-specific</div><h2>Vaccine & Room Sharing Requirements</h2><h3>Vaccines</h3><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Cat Accommodation Options</h2><div class="gap-note"><p><em>Not offered — Jamboree is dogs only.</em></p></div><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Pocket Pet Accommodation Options</h2><div class="gap-note"><p><em>Not on file — no pocket pet boarding documented for this location.</em></p></div><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:2;--trows:2"><div class="source-banner source-location">Location-specific</div><h2>Vaccine & Room Sharing Requirements</h2><h3>Vaccines</h3><ul>
 <li><strong>Dogs:</strong> Rabies, Distemper, Bordetella</li>
 <li>K9 Influenza and Negative Fecal are <strong>recommended but not required</strong></li>
 <li><strong>NO HANDWRITTEN VACCINE PAPERWORK</strong></li>
@@ -132,7 +159,7 @@
 <li>Must be neutered by 18 months to participate in group play</li>
 <li>Dogs can only share overnight suites if they are <strong>siblings</strong></li>
 <li>An unspayed female and unneutered male may <strong>not</strong> be in the same group</li>
-</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Add-on/Enrichment Options</h2><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Add-on/Enrichment Options</h2><ul>
 <li>Fetch &amp; Tug (15 min): $16</li>
 <li>Puzzle Time (15 min): $16</li>
 <li>Outdoor Stroll (10 min): $16</li>
@@ -140,10 +167,10 @@
 <li>Cuddle Time &amp; Brush Out (15 min): $16</li>
 <li>Add-on meal: $5</li>
 <li>Individual Care: $10.50</li>
-</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Cameras</h2><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Cameras</h2><ul>
 <li>Go to pawsweetpaw.com → pull up location → click <strong>Book Now</strong> → enter phone number to find existing account (may send a confirmation link) → green light in top right corner shows the camera feed is active</li>
 <li>Client must have a reservation and be <strong>checked in</strong> for this feature to work</li>
-</ul></div></div></div><div class="panel" data-tab="daycare"><div class="dash-grid"><div class="tile" style="--tcols:2;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Daycare Pricing + Package Options</h2><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div></div></div><div class="panel" data-tab="daycare"><div class="dash-grid"><div class="tile" style="--tcols:2;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Daycare Pricing + Package Options</h2><ul>
 <li>Short Day (5 hours): $36</li>
 <li>Full Day (12 hours): $57</li>
 </ul>
@@ -181,11 +208,11 @@
 </tr>
 </tbody>
 </table>
-<p>Puppy Play Group: <em>not offered as a separate named package — not on file.</em></p></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Group Play Details</h2><ul>
+<p>Puppy Play Group: <em>not offered as a separate named package — not on file.</em></p><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Group Play Details</h2><ul>
 <li>Play is split between <strong>small group and large group</strong></li>
 <li>Group play days &amp; times: <em>not on file</em></li>
 <li>What time must you check in to join the group: <em>not on file</em></li>
-</ul></div><div class="tile" style="--tcols:1;--trows:2"><div class="source-banner source-location">Location-specific</div><h2>Evaluation Details</h2><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:2"><div class="source-banner source-location">Location-specific</div><h2>Evaluation Details</h2><ul>
 <li><strong>Process:</strong> Bring pet in for a free day, recommend minimum 4 hours. Schedule as a daycare day.</li>
 <li><strong>Complimentary?</strong> Yes — it's a free day.</li>
 <li><strong>Booked in MoeGo how?</strong> Scheduled as a standard daycare day (not a distinct MoeGo appointment type).</li>
@@ -193,7 +220,7 @@
 <li>Max # per day: <em>not on file</em></li>
 <li>Required for new campers only, or all new dogs including boarders: <em>not on file</em></li>
 <li>Drop-off times: <em>not on file</em></li>
-</ul></div><div class="tile" style="--tcols:1;--trows:2"><div class="source-banner source-location">Location-specific</div><h2>Vaccine & Spay/Neuter Requirements</h2><h3>Vaccines</h3><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:2"><div class="source-banner source-location">Location-specific</div><h2>Vaccine & Spay/Neuter Requirements</h2><h3>Vaccines</h3><ul>
 <li><strong>Dogs:</strong> Rabies, Distemper, Bordetella</li>
 <li>K9 Influenza and Negative Fecal are <strong>recommended but not required</strong></li>
 <li><strong>NO HANDWRITTEN VACCINE PAPERWORK</strong></li>
@@ -202,7 +229,7 @@
 <li>Must be neutered by 18 months to participate in group play</li>
 <li>Dogs can only share overnight suites if they are <strong>siblings</strong></li>
 <li>An unspayed female and unneutered male may <strong>not</strong> be in the same group</li>
-</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Add-on/Enrichment Options</h2><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Add-on/Enrichment Options</h2><ul>
 <li>Fetch &amp; Tug (15 min): $16</li>
 <li>Puzzle Time (15 min): $16</li>
 <li>Outdoor Stroll (10 min): $16</li>
@@ -210,15 +237,15 @@
 <li>Cuddle Time &amp; Brush Out (15 min): $16</li>
 <li>Add-on meal: $5</li>
 <li>Individual Care: $10.50</li>
-</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Cameras</h2><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Cameras</h2><ul>
 <li>Go to pawsweetpaw.com → pull up location → click <strong>Book Now</strong> → enter phone number to find existing account (may send a confirmation link) → green light in top right corner shows the camera feed is active</li>
 <li>Client must have a reservation and be <strong>checked in</strong> for this feature to work</li>
-</ul></div></div></div><div class="panel" data-tab="training"><div class="dash-grid"><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Center Trainer</h2><div class="gap-note"><p><em>Not on file — no named trainer or contact info documented for Jamboree.</em></p></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Board + Train</h2><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div></div></div><div class="panel" data-tab="training"><div class="dash-grid"><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Center Trainer</h2><div class="gap-note"><p><em>Not on file — no named trainer or contact info documented for Jamboree.</em></p></div><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Board + Train</h2><ul>
 <li>Board and train (30 min): $55</li>
 <li>Board and train (60 min): $75</li>
 <li>Package options: <em>not on file beyond the two session lengths above</em></li>
 <li>Qualifications: <em>not on file</em></li>
-</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Single Session Training</h2><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Single Session Training</h2><ul>
 <li>Private Session: $75</li>
 <li>Puppy class: $63.60</li>
 <li>Beginner class: $63.60</li>
@@ -226,12 +253,12 @@
 <li>Start Smart: $45</li>
 <li>Package options: <em>not on file</em></li>
 <li>Qualifications: <em>not on file</em></li>
-</ul></div><div class="tile" style="--tcols:3;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Dog Training Interest Form</h2><div class="gap-note"><p><em>Not on file — no interest form link documented.</em></p></div></div></div></div><div class="panel" data-tab="grooming"><div class="dash-grid"><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Groomers</h2><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:3;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Dog Training Interest Form</h2><div class="gap-note"><p><em>Not on file — no interest form link documented.</em></p></div><div class="scroll-hint"><span>Scroll for more ▾</span></div></div></div></div><div class="panel" data-tab="grooming"><div class="dash-grid"><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Groomers</h2><ul>
 <li>Christian Diaz, Karla Diaz, Melissa Sanchez, Jonathan Powers, Michelle Chavez, Cathy Sanchez, Michelle Chin</li>
 <li>Check MoeGo for current schedule — schedule is accurate for all</li>
 <li>Max # of grooms per day: <em>not on file</em></li>
 <li>Specialty services (cats/pocket pets): <em>not offered — Jamboree does not board or groom cats or pocket pets</em></li>
-</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Bathers</h2><div class="gap-note"><p><em>Not on file — no separate bather roster documented. Unconfirmed whether groomers perform baths themselves (as is explicitly the case at some other Best Friends centers) or a bather role exists here.</em></p></div></div><div class="tile" style="--tcols:2;--trows:2"><div class="source-banner source-location">Location-specific</div><h2>Grooming & Bathing Pricing</h2><p><strong>Sweet Baths</strong> (includes Nail Trim, Teeth Brush, Anal Glands):</p>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Bathers</h2><div class="gap-note"><p><em>Not on file — no separate bather roster documented. Unconfirmed whether groomers perform baths themselves (as is explicitly the case at some other Best Friends centers) or a bather role exists here.</em></p></div><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:2;--trows:2"><div class="source-banner source-location">Location-specific</div><h2>Grooming & Bathing Pricing</h2><p><strong>Sweet Baths</strong> (includes Nail Trim, Teeth Brush, Anal Glands):</p>
 <table>
 <thead>
 <tr>
@@ -338,28 +365,45 @@
 <td>$131.50</td>
 </tr>
 </tbody>
-</table></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Grooming Add-On/Package Options</h2><div class="gap-note"><p><em>Not on file — the four service tiers above (Bath, Sweet Bath, Sweet Tidy Up, Sweet Groom) are the only grooming pricing structure documented; no separate add-on or package layer beyond that.</em></p></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Hours of Operation</h2><ul>
+</table><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-gap">Not on file</div><h2>Grooming Add-On/Package Options</h2><div class="gap-note"><p><em>Not on file — the four service tiers above (Bath, Sweet Bath, Sweet Tidy Up, Sweet Groom) are the only grooming pricing structure documented; no separate add-on or package layer beyond that.</em></p></div><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Hours of Operation</h2><ul>
 <li>Sweet Tidy Ups &amp; Sweet Grooms: 7:30 AM – 4:00 PM every day (possible appointments)</li>
 <li>Drop-off / pickup times: <em>not on file beyond the appointment window above</em></li>
-</ul></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Misc.</h2><ul>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div><div class="tile" style="--tcols:1;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>Misc.</h2><ul>
 <li>Cat &amp; Pocket Pet Grooming offered? No — Jamboree does not groom cats or pocket pets.</li>
 <li>Typical grooming durations: <em>not on file</em></li>
 <li>If fully booked, nearby BFPC referral: <em>not on file — Spectrum (247) is the sibling PSP location and a plausible referral, but this is not confirmed in source material.</em></li>
-</ul></div></div></div><div class="panel" data-tab="policies"><div class="dash-grid"><div class="tile" style="--tcols:3;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>BFPC Policy Docs</h2><p>This location follows the <a href="../best-friends-standard.html">Best Friends Standard</a> for all company-wide policy topics unless explicitly overridden above. No location-specific policy exceptions are on file beyond what's captured in the sections above.</p></div></div></div></div>
+</ul><div class="scroll-hint"><span>Scroll for more ▾</span></div></div></div></div><div class="panel" data-tab="policies"><div class="dash-grid"><div class="tile" style="--tcols:3;--trows:1"><div class="source-banner source-location">Location-specific</div><h2>BFPC Policy Docs</h2><p>This location follows the <a href="../best-friends-standard.html">Best Friends Standard</a> for all company-wide policy topics unless explicitly overridden above. No location-specific policy exceptions are on file beyond what's captured in the sections above.</p><div class="scroll-hint"><span>Scroll for more ▾</span></div></div></div></div></div>
 
 <script>
 (function() {
   var buttons = document.querySelectorAll('.tab-btn');
   var panels = document.querySelectorAll('.panel');
+  // A tile's real scrollHeight can only be measured once its panel is
+  // actually laid out (display:none panels report 0), so this runs every
+  // time a panel becomes active, plus again on resize since the 2-col/
+  // 1-col breakpoints change --tile-h and can flip a tile's overflow state.
+  function markOverflowingTiles(panel) {
+    panel.querySelectorAll('.tile').forEach(function(t) {
+      t.classList.toggle('has-overflow', t.scrollHeight > t.clientHeight + 1);
+    });
+  }
   function activate(key) {
     buttons.forEach(function(b) { b.classList.toggle('active', b.dataset.tab === key); });
-    panels.forEach(function(p) { p.classList.toggle('active', p.dataset.tab === key); });
+    panels.forEach(function(p) {
+      var isActive = p.dataset.tab === key;
+      p.classList.toggle('active', isActive);
+      if (isActive) markOverflowingTiles(p);
+    });
   }
   buttons.forEach(function(b) {
     b.addEventListener('click', function() {
       activate(b.dataset.tab);
       history.replaceState(null, '', '#' + b.dataset.tab);
     });
+  });
+  window.addEventListener('resize', function() {
+    var activePanel = document.querySelector('.panel.active');
+    if (activePanel) markOverflowingTiles(activePanel);
   });
   var initial = (location.hash || '').replace('#', '') || buttons[0].dataset.tab;
   if (![].some.call(buttons, function(b) { return b.dataset.tab === initial; })) { initial = buttons[0].dataset.tab; }
