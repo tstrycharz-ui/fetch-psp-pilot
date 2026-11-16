@@ -1,0 +1,188 @@
+<!doctype html><html><head><meta name="robots" content="noindex,nofollow"><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Best Friends Customer Communications</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: one printable letter page. Plum masthead band, stat strip, challenge→working table, two "how it works" panels, flow strip. Single light look on purpose (brand + print). */
+:root{
+  --plum:#5D3565; --plum-deep:#302037; --orange:#F69535; --orange-deep:#E27B26;
+  --ink:#2a2230; --muted:#6c6272; --line:#e6dfe8; --wash:#f7f3f8; --paper:#ffffff;
+  --display:"Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body:"Outfit", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+body{background:var(--wash);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;margin:0}
+.sheet{max-width:880px;margin:24px auto;background:var(--paper);box-shadow:0 1px 3px rgba(48,32,55,.12)}
+.pad{padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+@media (min-width:640px){.pad{padding-left:44px;padding-right:44px}}
+
+.mast{background:var(--plum);color:#fff;padding-block:28px 26px;position:relative;overflow:hidden}
+.mast::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:var(--plum-deep);opacity:.55}
+.brand{display:flex;align-items:baseline;gap:10px;position:relative;z-index:1}
+.brand b{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01em}
+.brand span{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--orange)}
+.mast h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,4.4vw,38px);line-height:1.1;margin:18px 0 8px;text-wrap:balance;position:relative;z-index:1;max-width:22ch}
+.mast h1 em{font-style:normal;color:var(--orange)}
+.mast p{margin:0;color:#e9dcec;max-width:60ch;position:relative;z-index:1}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
+.stat{padding-block:16px;padding-inline:4px;border-right:1px solid var(--line);text-align:center}
+.stat:last-child{border-right:0}
+.stat b{display:block;font-family:var(--display);font-size:28px;font-weight:700;color:var(--plum);font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:12px;color:var(--muted);letter-spacing:.04em}
+@media (max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+
+section{padding-block:26px 6px}
+h2{font-family:var(--display);font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange-deep);margin:0 0 12px;font-weight:700}
+
+.rows{display:grid;gap:0;border-top:2px solid var(--plum)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1.35fr);gap:14px;padding-block:13px;border-bottom:1px solid var(--line);align-items:start}
+.row .was{color:var(--muted);font-size:14px}
+.row .arrow{color:var(--orange);font-weight:700;font-size:18px;line-height:1.2;text-align:center}
+.row .now b{color:var(--plum-deep);font-weight:700}
+.head{padding-block:8px;border-bottom:1px solid var(--line)}
+.head div{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+@media (max-width:560px){.row{grid-template-columns:minmax(0,1fr);gap:4px}.row .arrow{display:none}.head{display:none}.row .was::before{content:"Challenge: ";font-weight:600}}
+
+.how{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:640px){.how{grid-template-columns:minmax(0,1fr)}}
+.panel{border:1px solid var(--line);border-top:4px solid var(--orange);padding:16px 18px;background:var(--paper)}
+.panel h3{font-family:var(--display);font-size:19px;margin:0 0 6px;color:var(--plum-deep)}
+.panel p{margin:0 0 10px;font-size:14px}
+.panel ul{margin:0;padding-left:18px;font-size:14px;display:grid;gap:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--wash);color:var(--plum);border:1px solid var(--line)}
+
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin-top:4px}
+.node{flex:1 1 150px;min-width:0;padding:12px 14px;background:var(--wash);border:1px solid var(--line)}
+.node b{display:block;font-family:var(--display);color:var(--plum-deep);font-size:15px}
+.node span{font-size:13px;color:var(--muted)}
+.node.hub{background:var(--plum);border-color:var(--plum)}
+.node.hub b{color:#fff}.node.hub span{color:#e9dcec}
+.join{align-self:center;color:var(--orange);font-weight:800;font-size:20px}
+.side{margin-top:10px;font-size:13px;color:var(--muted)}
+.side b{color:var(--plum-deep)}
+
+footer{padding-block:22px 26px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--line);margin-top:24px}
+
+@page{size:letter;margin:0.45in}
+@media print{
+  body{background:#fff;font-size:11px;line-height:1.4}
+  .row .was,.panel p,.panel ul{font-size:11px}
+  .stat{padding-block:8px}.stat b{font-size:22px}
+  .mast{padding-block:16px 14px}
+  .chips{margin-top:6px}.chip{font-size:10px}
+  .node{padding:8px 10px}.node b{font-size:13px}.node span,.side{font-size:11px}
+  h2{margin-bottom:6px}
+  .sheet{margin:0;box-shadow:none;max-width:none}
+  .pad{padding-left:0;padding-right:0}
+  .mast{padding-left:22px;padding-right:22px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .node.hub,.stat,.chip,.node{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  section{padding-block:10px 0;break-inside:avoid}
+  .row{padding-block:5px}
+  .head{padding-block:4px}
+  .panel{padding:8px 12px}
+  .panel ul{gap:2px}
+  .mast h1{font-size:24px;margin-top:8px;max-width:none}
+  footer{margin-top:12px;padding-block:10px 0}
+}
+</style>
+
+<div class="sheet">
+  <header class="mast pad">
+    <div class="brand"><b>Best Friends</b><span>Pet Care</span></div>
+    <h1>One system for every customer conversation, <em>at all 81 locations</em></h1>
+    <p>What's now working in GoHighLevel for Best Friends Pet Care and its family of brands.</p>
+  </header>
+
+  <div class="stats pad" role="list">
+    <div class="stat" role="listitem"><b>81</b><span>locations connected</span></div>
+    <div class="stat" role="listitem"><b>35</b><span>brands</span></div>
+    <div class="stat" role="listitem"><b>36</b><span>website forms routed</span></div>
+    <div class="stat" role="listitem"><b>81</b><span>local texting numbers</span></div>
+  </div>
+
+  <section class="pad">
+    <h2>What's working now</h2>
+    <div class="rows">
+      <div class="row head"><div>The challenge</div><div></div><div>Working now</div></div>
+      <div class="row">
+        <div class="was">81 locations and 35 brands, with customer messages spread across many websites and inboxes</div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="now"><b>One inbox for everything.</b> Every form, text, email and chat lands in one place, and each location has its own filtered view.</div>
+      </div>
+      <div class="row">
+        <div class="was">Getting each website enquiry to the right location quickly</div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="now"><b>Automatic routing.</b> All 36 website forms tag the enquiry by brand, location and service, and contact that location instantly.</div>
+      </div>
+      <div class="row">
+        <div class="was">The main website serves every location</div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="now"><b>Main-site enquiries are sorted automatically</b> to the right location. Anything unclear goes to HQ.</div>
+      </div>
+      <div class="row">
+        <div class="was">Locations need to text customers about more than bookings</div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="now"><b>Every location has its own texting number.</b> MoeGo stays the home for bookings.</div>
+      </div>
+      <div class="row">
+        <div class="was">Knowing who agreed to receive texts and emails</div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="now"><b>Consent is recorded with a date</b> on every form, with ready-made opt-in and opt-out lists.</div>
+      </div>
+      <div class="row">
+        <div class="was">Customer email replies getting lost</div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="now"><b>The location is alerted</b> every time a customer replies.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pad">
+    <h2>How it works</h2>
+    <div class="how">
+      <div class="panel">
+        <h3>Fetch, the website chat assistant</h3>
+        <p>Each location's website has its own assistant. It answers 24/7 using that location's own hours, services and prices.</p>
+        <ul>
+          <li>It never books a stay. It collects the details and passes the chat to the location's team.</li>
+          <li>The location is notified the moment the chat needs a person.</li>
+          <li>On the main website, Fetch asks which location the customer wants and routes the chat there.</li>
+        </ul>
+        <div class="chips"><span class="chip">Booking request ready</span><span class="chip">Needs our team</span><span class="chip">Pet emergency</span><span class="chip">Asked for a person</span></div>
+      </div>
+      <div class="panel">
+        <h3>New-customer welcome</h3>
+        <p>When a first-time customer sends an enquiry, they get a welcome email in their location's own design.</p>
+        <ul>
+          <li>It carries the FETCH30 new-customer offer (the current promo code, which can be changed down the line) and the location's booking link.</li>
+          <li>Returning customers don't get it, and nobody gets it twice.</li>
+          <li>Each location keeps its own look and offer.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="pad">
+    <h2>The big picture</h2>
+    <div class="flow">
+      <div class="node"><b>Customers</b><span>website forms, chat, texts, email replies</span></div>
+      <div class="join" aria-hidden="true">→</div>
+      <div class="node hub"><b>GoHighLevel</b><span>tags each customer by brand, location and service</span></div>
+      <div class="join" aria-hidden="true">→</div>
+      <div class="node"><b>The right location</b><span>alerted instantly, replies from one inbox</span></div>
+    </div>
+    <p class="side"><b>Bookings</b> stay in MoeGo: confirmations, reminders and changes. GoHighLevel handles everything else.</p>
+  </section>
+
+  <footer class="pad">
+    <span>Best Friends Pet Care · GoHighLevel setup</span>
+    <span>Last Updated: November 16, 2026</span>
+  </footer>
+</div>
+
+</body></html>

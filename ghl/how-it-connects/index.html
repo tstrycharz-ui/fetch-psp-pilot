@@ -1,0 +1,423 @@
+<!doctype html><html><head><meta name="robots" content="noindex,nofollow"><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="color-scheme" content="light only">
+<title>How the Best Friends GHL Setup Connects</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Matches the editable canvas: white page, soft colored step boxes, roomy spacing, notes in a column on the right. */
+:root{
+  --plum:#5D3565; --plum-deep:#302037; --orange:#C9631A;
+  --ink:#2a2230; --muted:#564d5c; --arrow:#6f6575; --line:#e2dcd4; --note:#ffffff; --page:#f7f4ee;
+  --cust:#fff1e3; --cust-b:#F69535;
+  --auto:#efe7f2; --auto-b:#5D3565;
+  --team:#e6f3ee; --team-b:#2f7d5b;
+  --outside:#eef0f2; --outside-b:#7a8590;
+  --display:"Outfit","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme: light;
+}
+/* Always light, even when the device is in dark mode */
+*{box-sizing:border-box}
+body{background:var(--page);color:var(--ink);font-family:var(--display);font-size:15px;line-height:1.5;margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:48px 64px}
+header.top{display:grid;gap:8px;margin-bottom:24px}
+.eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--plum);font-weight:700}
+h1{color:var(--plum-deep);font-size:clamp(28px,4vw,36px);line-height:1.1;margin:0;text-wrap:balance}
+.lead{margin:0;color:var(--muted);font-size:16px;max-width:68ch}
+
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-bottom:20px;font-size:14px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.sw{width:16px;height:16px;border:2px solid;border-radius:4px;display:inline-block}
+
+nav.toc{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+nav.toc a{font-size:13px;text-decoration:none;color:var(--ink);padding:6px 12px;border:1px solid var(--line);border-radius:6px}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--plum);outline:none}
+
+.journey{display:grid;grid-template-columns:minmax(0,1fr) 380px;column-gap:72px;padding:56px 0;border-top:1px solid var(--line);margin-top:40px}
+.jhead,.journey .sum{grid-column:1 / -1}
+.flow,.big,.under{grid-column:1}
+.panels{grid-column:2;grid-row:3 / span 3;align-self:start}
+.jhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.jnum{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.journey h2{font-size:32px;margin:0;line-height:1.25;color:var(--plum-deep)}
+.journey .sum{margin:0 0 40px;color:var(--muted);font-size:16px;max-width:72ch}
+
+.flow{display:grid;gap:0;max-width:560px}
+.step{display:grid;align-content:center;grid-template-columns:minmax(0,1fr);border:2px solid;border-radius:8px;padding:12px 18px;min-height:72px}
+.step b{font-size:15px}
+.step p{margin:2px 0 0;font-size:14px;color:var(--muted)}
+code{font-family:var(--mono);font-size:12.5px}
+.cust{background:var(--cust);border-color:var(--cust-b)}
+.auto{background:var(--auto);border-color:var(--auto-b)}
+.team{background:var(--team);border-color:var(--team-b)}
+.outside{background:var(--outside);border-color:var(--outside-b)}
+.arrow{height:44px;margin-left:50%;border-left:2px solid var(--arrow);position:relative}
+.arrow::after{content:"";position:absolute;left:-7px;bottom:-1px;border:6px solid transparent;border-top:8px solid var(--arrow)}
+.arrow i{position:absolute;left:14px;top:12px;font-size:13px;color:var(--arrow);font-style:normal;white-space:nowrap}
+.fork{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.fork .step{height:100%}
+.side{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr);gap:16px;align-items:center}
+@media (max-width:560px){.side{grid-template-columns:minmax(0,1fr)}}
+
+.big{overflow-x:auto}
+.bigrid{display:grid;grid-template-columns:minmax(150px,1fr) 32px minmax(180px,1.2fr) 32px minmax(150px,1fr);gap:12px 0;align-items:center;min-width:620px}
+.bigrid .box{padding:10px 14px;border:2px solid;border-radius:8px;font-size:14px}
+.bigrid .box b{display:block;font-size:15px}
+.bigrid .to{text-align:center;color:var(--arrow);font-weight:700}
+.bigrid .colh{grid-row:1}
+.bigrid .end{grid-column:5;grid-row:2 / span 6;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+.colh{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.under{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:40px}
+.under .box,.under .step{padding:12px 18px;border:2px solid;border-radius:8px}
+
+.panels{display:grid;gap:24px}
+#big-picture .big,#big-picture .under{grid-column:1 / -1}
+#big-picture .under{align-items:start}
+#big-picture .panels{grid-column:1 / -1;grid-row:auto;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:40px}
+.panel{background:var(--note);border:1px solid var(--line);border-radius:8px;padding:16px 20px}
+.panel h3{margin:0 0 8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--plum)}
+.panel.edit h3{color:var(--orange)}
+.panel ul{margin:0;padding-left:18px;display:grid;gap:8px;font-size:14px;line-height:1.6}
+.panel .warn{margin-top:14px;font-size:14px;line-height:1.6}
+.panel .warn::before{content:"Heads up: ";font-weight:700}
+
+@media (max-width:900px){
+  .journey{grid-template-columns:minmax(0,1fr)}
+  .panels{grid-column:1;grid-row:auto;margin-top:40px}
+  .flow{max-width:none}
+}
+@page{size:letter;margin:.45in}
+@media print{
+  .wrap{max-width:none;padding:0}
+  nav.toc{display:none}
+  .journey{break-before:page;border-top:0;margin-top:0;padding-top:0}
+  .journey:first-of-type{break-before:auto}
+  .step,.box,.panel,.sw{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Best Friends Pet Care · GoHighLevel</div>
+    <h1>How the setup connects</h1>
+    <p class="lead">One diagram per customer journey. Follow the arrows from top to bottom. Under each diagram: where to find each piece in GHL, and when you'd need to change something.</p>
+    <p class="lead" style="font-size:13px">Last Updated: November 16, 2026</p>
+  </header>
+
+  <div class="legend" aria-label="Color key">
+    <span><i class="sw" style="background:var(--cust);border-color:var(--cust-b)"></i>Customer does something</span>
+    <span><i class="sw" style="background:var(--auto);border-color:var(--auto-b)"></i>GHL does it automatically</span>
+    <span><i class="sw" style="background:var(--team);border-color:var(--team-b)"></i>Location team</span>
+    <span><i class="sw" style="background:var(--outside);border-color:var(--outside-b)"></i>Outside GHL</span>
+  </div>
+
+  <nav class="toc" aria-label="Diagrams">
+    <a href="#big-picture">1 · Big picture</a>
+    <a href="#location-chat">2 · Location website chat</a>
+    <a href="#main-site-chat">3 · Main website chat</a>
+    <a href="#enquiry-form">4 · New enquiry form</a>
+    <a href="#texting">5 · Texting</a>
+    <a href="#manager-reports">6 · Manager reports</a>
+    <a href="#updating-info">7 · Updating location info</a>
+  </nav>
+
+  <!-- 1 -->
+  <section class="journey" id="big-picture">
+    <div class="jhead"><span class="jnum">1 of 7</span><h2>The big picture</h2></div>
+    <p class="sum">Every way a customer reaches Best Friends, what handles it in GHL, and where it ends up. Every path ends the same way: the contact is tagged to one location, and that location is told.</p>
+    <div class="big">
+      <div class="bigrid">
+        <div class="colh">Customer</div><div class="colh"></div><div class="colh">Handled by</div><div class="colh"></div><div class="colh">Ends up</div>
+
+        <div class="box cust"><b>Brand website form</b>ContactUs_BR-001 to 035</div><div class="to">→</div>
+        <div class="box auto"><b>Brand Forms Tagging</b>10 workflows, one per group of brands</div><div class="to">→</div>
+        <div class="box team end"><div><b>The right location</b>Contact tagged <code>loc:</code> <code>brand:</code> <code>req:</code>, assigned to the location's user, and the location is alerted. Staff reply from <strong>Conversations</strong>.</div></div>
+
+        <div class="box cust"><b>Main website form</b>BFPC -Lead Form — MASTER</div><div class="to">→</div>
+        <div class="box auto"><b>WF-01 then WF-03</b>Location routing, then request type</div><div class="to">→</div>
+
+        <div class="box cust"><b>Location website chat</b>That location's widget</div><div class="to">→</div>
+        <div class="box auto"><b>Location bot (Fetch)</b>+ Webchat Center Stamping</div><div class="to">→</div>
+
+        <div class="box cust"><b>Main website chat</b>HQ widget</div><div class="to">→</div>
+        <div class="box auto"><b>HQ bot</b>+ HQ Chat - Route to Location</div><div class="to">→</div>
+
+        <div class="box cust"><b>Text to a location number</b>81 numbers</div><div class="to">→</div>
+        <div class="box auto"><b>Conversations</b>Lands with that location's user</div><div class="to">→</div>
+
+        <div class="box cust"><b>Reply to an email</b>Any email we sent</div><div class="to">→</div>
+        <div class="box auto"><b>Customer Email Reply - Location Alert</b></div><div class="to">→</div>
+      </div>
+    </div>
+    <div class="under">
+      <div class="box outside"><b>PawConnect fact cards</b><br>Each bot reads its location's card live for hours, services and prices.</div>
+      <div class="box outside"><b>MoeGo</b><br>Bookings, confirmations, reminders and changes. Not connected to GHL.</div>
+      <div class="box auto"><b>On every form</b><br>BFPC Consent Capture records consent. The WF-NC Router sends first-time customers their location's welcome (once the router is switched on).</div>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <h3>Where to find it</h3>
+        <ul>
+          <li>Workflows: Automation, then Workflows</li>
+          <li>Bots: AI Agents, then Conversation AI, then Agents List</li>
+          <li>Forms: Sites, then Forms</li>
+          <li>Messages: Conversations</li>
+        </ul>
+      </div>
+      <div class="panel edit">
+        <h3>When to edit</h3>
+        <ul>
+          <li>Diagrams 2 to 7 cover each path in detail, with its own edit notes.</li>
+          <li>The location tag (<code>loc:bf3</code> for Bethany) is what ties everything together. Never rename a location tag.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="journey" id="location-chat">
+    <div class="jhead"><span class="jnum">2 of 7</span><h2>Location website chat</h2></div>
+    <p class="sum">A customer chats on one location's website. The bot answers from that location's facts and hands the chat to the team when a person is needed.</p>
+    <div class="flow">
+      <div class="step cust"><b>Customer opens the chat on a location's site</b><p>They enter name, email, phone and consent first</p></div>
+      <div class="arrow"></div>
+      <div class="step auto"><b>Webchat Center Stamping – BF3</b><p>Tags <code>loc:bf3</code> <code>brand:br-006</code> <code>src:webchat</code></p></div>
+      <div class="arrow"></div>
+      <div class="side">
+        <div class="step auto"><b>Bethany's bot (Fetch) answers</b><p>"Get center facts" looks up the fact card</p></div>
+        <div class="step outside"><b>PawConnect fact card</b></div>
+      </div>
+      <div class="arrow"><i>needs a person?</i></div>
+      <div class="fork">
+        <div class="step auto"><b>Reservation request ready</b></div>
+        <div class="step auto"><b>Needs our team</b></div>
+        <div class="step auto"><b>Pet emergency</b></div>
+        <div class="step auto"><b>Human Requested</b></div>
+      </div>
+      <div class="arrow"><i>any hand-off</i></div>
+      <div class="step auto"><b>Hand-off action</b><p>Assigns the location's user, tags <code>human handover</code>, creates a task</p></div>
+      <div class="arrow"></div>
+      <div class="step auto"><b>Chat Bot Hand-off Email Alert</b><p>Emails the location right away</p></div>
+      <div class="arrow"></div>
+      <div class="step team"><b>Staff reply in Conversations</b><p>The bot goes quiet once staff reply</p></div>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <h3>Where to find it</h3>
+        <ul>
+          <li>Bot: AI Agents, then Conversation AI, then Agents List</li>
+          <li>Widget: Sites, then Chat Widget</li>
+          <li>Stamping: Workflows, folder "Webchat Center Stamping"</li>
+          <li>Alert: Workflows, "Chat Bot Hand-off Email Alert"</li>
+        </ul>
+      </div>
+      <div class="panel edit">
+        <h3>When to edit</h3>
+        <ul>
+          <li><b>Bot gave a wrong answer:</b> fix that location's PawConnect page. Don't touch the bot.</li>
+          <li><b>Location inbox changed:</b> update the location's user email in Settings, then Users. Hand-off alerts follow it.</li>
+          <li><b>Change how all bots behave:</b> all 83 share the same rules, so change every bot the same way (use the bulk-edit skill).</li>
+          <li><b>Keep switched on:</b> the hand-off alert workflow and the stamping workflows.</li>
+        </ul>
+        <div class="warn">Marking a quiet chat as Read without replying wakes the bot up again. Staff should reply or leave it.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="journey" id="main-site-chat">
+    <div class="jhead"><span class="jnum">3 of 7</span><h2>Main website chat</h2></div>
+    <p class="sum">The main site covers every location, so the bot first finds out which one the customer means, then routes the chat there.</p>
+    <div class="flow">
+      <div class="step cust"><b>Customer chats on bestfriendspetcare.com</b></div>
+      <div class="arrow"></div>
+      <div class="step auto"><b>HQ bot asks which location</b><p>"Best Friends Pet Care HQ - Chat"</p></div>
+      <div class="arrow"><i>customer names a location</i></div>
+      <div class="step auto"><b>Bot's "Route chat to location" action</b><p>Sends the center code (e.g. <code>BF3</code>). The customer never sees this.</p></div>
+      <div class="arrow"></div>
+      <div class="step auto"><b>HQ Chat - Route to Location</b><p>Saves the code, tags the contact for that location, assigns the location's user.</p></div>
+      <div class="arrow"></div>
+      <div class="side">
+        <div class="step auto"><b>Bot answers with that location's facts</b></div>
+        <div class="step outside"><b>PawConnect fact card</b></div>
+      </div>
+      <div class="arrow"><i>needs a person?</i></div>
+      <div class="step auto"><b>Hand-off goes to Chat Team first</b><p>GHL needs a named user. After 1 minute the alert workflow moves it to the location's user and emails them.</p></div>
+      <div class="arrow"></div>
+      <div class="step team"><b>Location replies in Conversations</b></div>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <h3>Where to find it</h3>
+        <ul>
+          <li>Bot: Agents List, "Best Friends Pet Care HQ - Chat"</li>
+          <li>Routing: Workflows, "HQ Chat - Route to Location"</li>
+          <li>Hand-offs: Workflows, "Chat Bot Hand-off Email Alert"</li>
+        </ul>
+      </div>
+      <div class="panel edit">
+        <h3>When to edit</h3>
+        <ul>
+          <li><b>Chat stuck with Chat Team:</b> the customer never named a location. Someone at HQ assigns it by hand.</li>
+          <li><b>New or closed location:</b> update the HQ bot's location list and the branches in both workflows above.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="journey" id="enquiry-form">
+    <div class="jhead"><span class="jnum">4 of 7</span><h2>New enquiry form</h2></div>
+    <p class="sum">A customer sends a form. It gets tagged, the location is alerted, and first-time customers get a welcome.</p>
+    <div class="flow">
+      <div class="fork">
+        <div class="step cust"><b>Brand website form</b><p><code>ContactUs_BR-xxx</code></p></div>
+        <div class="step cust"><b>Main website form</b><p><code>MASTER</code></p></div>
+      </div>
+      <div class="arrow"></div>
+      <div class="fork">
+        <div class="step auto"><b>Brand Forms Tagging</b><p>The group's workflow for that brand</p></div>
+        <div class="step auto"><b>WF-01, then WF-03</b><p>Unmatched location goes to HQ (Bailey)</p></div>
+      </div>
+      <div class="arrow"><i>both paths</i></div>
+      <div class="step auto"><b>Contact tagged and location alerted</b><p>Tags <code>loc:</code> <code>brand:</code> <code>req:</code>. "New BFPC Lead" email to the location's inbox.</p></div>
+      <div class="arrow"><i>at the same time</i></div>
+      <div class="fork">
+        <div class="step auto"><b>BFPC Consent Capture</b><p>Records text and email consent</p></div>
+        <div class="step auto"><b>WF-NC Router</b><p>Waits 2 min, first-time customers only</p></div>
+      </div>
+      <div class="arrow"></div>
+      <div class="step auto"><b>Location's welcome (WF-NC … FETCH30)</b><p>Welcome emails in the location's design, with the booking link</p></div>
+      <div class="arrow"></div>
+      <div class="side">
+        <div class="step team"><b>Location follows up in Conversations</b></div>
+        <div class="step outside"><b>Customer books in MoeGo</b></div>
+      </div>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <h3>Where to find it</h3>
+        <ul>
+          <li>Forms: Sites, then Forms</li>
+          <li>Tagging: Workflows, folder "35 Brand Forms Tagging"</li>
+          <li>Welcomes: Workflows, folder "WF-NC New Customer Welcome"</li>
+          <li>Email copies: Marketing, Emails, Templates, "WF-NC Welcome Emails"</li>
+        </ul>
+      </div>
+      <div class="panel edit">
+        <h3>When to edit</h3>
+        <ul>
+          <li><b>Location inbox changed:</b> update its alert email inside the brand's tagging workflow (it's typed in there).</li>
+          <li><b>New promo code:</b> edit the welcome emails in that location's WF-NC workflow.</li>
+          <li><b>New location:</b> add it to the form, the tagging workflow and the router.</li>
+        </ul>
+        <div class="warn">The router and the welcomes stay off until launch day (Bethany's welcome is already on).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="journey" id="texting">
+    <div class="jhead"><span class="jnum">5 of 7</span><h2>Texting</h2></div>
+    <p class="sum">Location numbers are for the team. The bots don't answer texts, and bookings stay with MoeGo.</p>
+    <div class="flow">
+      <div class="step cust"><b>Customer texts the location's GHL number</b></div>
+      <div class="arrow"></div>
+      <div class="step auto"><b>Lands in Conversations</b><p>With that location's user, next to chats and emails</p></div>
+      <div class="arrow"></div>
+      <div class="step team"><b>Staff reply from the same number</b></div>
+    </div>
+    <div class="under">
+      <div class="step auto"><b>Automatic texts</b><p>Welcome texts go out from the location's own number, only to customers who opted in.</p></div>
+      <div class="step auto"><b>STOP</b><p>GHL stops texting that customer automatically.</p></div>
+      <div class="step outside"><b>MoeGo</b><p>Booking confirmations, reminders and changes come from MoeGo's own number.</p></div>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <h3>Where to find it</h3>
+        <ul>
+          <li>Numbers: Settings, then Phone System (one per location, named "BFPH - …")</li>
+          <li>Bot texting: each bot's Deploy tab. SMS is off on all 83.</li>
+        </ul>
+      </div>
+      <div class="panel edit">
+        <h3>When to edit</h3>
+        <ul>
+          <li><b>New location:</b> buy a local number and link it to the location's user.</li>
+          <li><b>Bots answering texts:</b> only if Best Friends decides it. Switch SMS on per bot in Deploy.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="journey" id="manager-reports">
+    <div class="jhead"><span class="jnum">6 of 7</span><h2>Manager reports</h2></div>
+    <p class="sum">A small scheduled script reads GHL each morning and emails every location manager what needs attention. It only reads; it never changes anything.</p>
+    <div class="flow">
+      <div class="step outside"><b>Scheduled script, 7 AM Central</b><p>Daily, plus a weekly summary on Mondays. Set up once from SETUP.md.</p></div>
+      <div class="arrow"><i>reads, with a view-only key</i></div>
+      <div class="step auto"><b>GHL conversations from the last 14 days</b><p>Grouped by each contact's <code>loc:</code> tag</p></div>
+      <div class="arrow"><i>one email per location</i></div>
+      <div class="step auto"><b>Manager Reports - Send Email</b><p>Sends it from Bailey @ Best Friends</p></div>
+      <div class="arrow"></div>
+      <div class="step team"><b>Manager inbox</b><p>e.g. <code>bet_mgr@bestfriends.net</code></p></div>
+    </div>
+    <div class="under">
+      <div class="step team"><b>Daily: open items</b><p>Hand-offs waiting, customers waiting over 30 min, new enquiries not contacted</p></div>
+      <div class="step team"><b>Monday: last 7 days</b><p>Enquiries, chats, hand-offs, staff replies, typical reply time</p></div>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <h3>Where to find it</h3>
+        <ul>
+          <li>Sender: Workflows, "Manager Reports - Send Email" (keep published)</li>
+          <li>Script and manager list: the Manager Reports package</li>
+        </ul>
+      </div>
+      <div class="panel edit">
+        <h3>When to edit</h3>
+        <ul>
+          <li><b>Manager inbox changes:</b> edit that location in the locations file.</li>
+          <li><b>Different send time:</b> change the schedule in the script.</li>
+          <li><b>Contacts missing from a report:</b> they have no <code>loc:</code> tag.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="journey" id="updating-info">
+    <div class="jhead"><span class="jnum">7 of 7</span><h2>Updating location info</h2></div>
+    <p class="sum">The bots read each location's facts live, so updating PawConnect is all it takes. Nothing changes in GHL.</p>
+    <div class="flow">
+      <div class="step team"><b>Hours, prices or services change</b></div>
+      <div class="arrow"></div>
+      <div class="step outside"><b>Update the location's PawConnect page</b><p>Suggest an edit, highlight the text, Request edit</p></div>
+      <div class="arrow"></div>
+      <div class="step outside"><b>The fact card updates</b><p>Built from the same page</p></div>
+      <div class="arrow"><i>next chat</i></div>
+      <div class="step auto"><b>Bot's "Get center facts" reads the new card</b></div>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <h3>Where to find it</h3>
+        <ul>
+          <li>PawConnect knowledge base, one page per location (center code, e.g. BF3)</li>
+        </ul>
+      </div>
+      <div class="panel edit">
+        <h3>When to edit</h3>
+        <ul>
+          <li><b>Same day</b> a price or hour changes, so the bot never quotes old info.</li>
+          <li><b>Hours, phone, address:</b> these come from the master sheet, so send them to an admin.</li>
+          <li><b>Booking link changes:</b> also update the location's welcome emails in GHL.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+</body></html>
